@@ -1,0 +1,230 @@
+// Third-party Imports
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+
+// Type Imports
+import type { ColumnType, TaskType, CommentType } from '@/types/apps/designTypes'
+import type { ApiTask } from '@/services/designService'
+
+// Data Imports
+import { fetchDesigns } from '@/services/designService'
+
+// Async thunk for fetching designs
+export const fetchDesignsThunk = createAsyncThunk(
+  'design/fetchDesigns',
+  async () => {
+    const response = await fetchDesigns()
+    return response.result
+  }
+)
+
+// Initial state
+const initialState = {
+  columns: [
+    { id: 1, title: 'New', taskIds: [] as string[], status: 1 },
+    { id: 2, title: 'Processing', taskIds: [] as string[], status: 2 },
+    { id: 3, title: 'Submitted', taskIds: [] as string[], status: 3 },
+    { id: 4, title: 'Done', taskIds: [] as string[], status: 4 }
+  ] as ColumnType[],
+  tasks: [] as TaskType[],
+  currentTaskId: null as string | null,
+  loading: false,
+  error: null as string | null,
+  productTypes: {} as { [key: string]: string },
+}
+
+export const designSlice = createSlice({
+  name: 'design',
+  initialState,
+  reducers: {
+    editColumn: (state, action) => {
+      const { id, title } = action.payload
+      const column = state.columns.find(column => column.id === id)
+      if (column) {
+        column.title = title
+      }
+    },
+
+    updateSingleTask: (state, action) => {
+      const { taskId, status, designer_id } = action.payload;
+      
+      // Update task status and designer_id
+      const task = state.tasks.find(t => t.id === taskId);
+      if (task) {
+        task.status = status;
+        
+        // Update designer_id if provided
+        if (designer_id !== undefined) {
+          task.designer_id = designer_id;
+        }
+      }
+        
+      
+      // Update column taskIds
+      state.columns.forEach(column => {
+        // Remove task from all columns
+        column.taskIds = column.taskIds.filter(id => id !== taskId);
+        
+        // Add to correct column
+        if (column.status === status) {
+          column.taskIds.push(taskId);
+        }
+      });
+    },
+
+    updateTaskDropbox: (state, action) => {
+      const { taskId, dropbox } = action.payload;
+      
+      // Find the task and update dropbox links
+      const task = state.tasks.find(t => t.id === taskId);
+      if (task) {
+        task.dropbox = dropbox;
+      }
+    },
+
+    updateTaskComments: (state, action) => {
+      const { taskId, comments } = action.payload;
+      
+      // Find the task and update comments
+      const task = state.tasks.find(t => t.id === taskId);
+      if (task) {
+        task.comments = comments;
+      }
+    },
+
+    deleteColumn: (state, action) => {
+      const { columnId } = action.payload
+      const column = state.columns.find(column => column.id === columnId)
+      state.columns = state.columns.filter(column => column.id !== columnId)
+      if (column) {
+        state.tasks = state.tasks.filter(task => !column.taskIds.includes(task.id))
+      }
+    },
+    
+    deleteDesign: (state, action) => {
+      const taskId = action.payload;
+      
+      // Remove task from tasks array
+      state.tasks = state.tasks.filter(task => task.id !== taskId);
+      
+      // Remove task from all columns
+      state.columns.forEach(column => {
+        column.taskIds = column.taskIds.filter(id => id !== taskId);
+      });
+      
+      // Reset currentTaskId if this design was selected
+      if (state.currentTaskId === taskId) {
+        state.currentTaskId = null;
+      }
+    },
+
+    updateColumns: (state, action) => {
+      state.columns = action.payload
+    },
+
+    updateColumnTaskIds: (state, action) => {
+      const { id, tasksList } = action.payload;
+      
+      // Update column taskIds
+      state.columns = state.columns.map(column => {
+        if (column.id === id) {
+          return {
+            ...column,
+            taskIds: tasksList.filter(Boolean).map((task: TaskType) => task.id)
+          }
+        }
+        return column;
+      });
+
+      // Update task statuses based on their new column
+      state.tasks = state.tasks.map(task => {
+        const column = state.columns.find(col => col.taskIds.includes(task.id));
+        if (column) {
+          return { ...task, status: column.status };
+        }
+        return task;
+      });
+    },
+
+    getCurrentTask: (state, action) => {
+      state.currentTaskId = action.payload
+    },
+
+    setProductTypes: (state, action) => {
+      state.productTypes = action.payload;
+    },
+
+    updateTask: (state, action) => {
+      const { taskId, updates } = action.payload;
+      const taskIndex = state.tasks.findIndex(task => task.id === taskId);
+      
+      if (taskIndex !== -1) {
+        state.tasks[taskIndex] = {
+          ...state.tasks[taskIndex],
+          ...updates
+        };
+      }
+    }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchDesignsThunk.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchDesignsThunk.fulfilled, (state, action) => {
+        state.loading = false
+        // Convert API tasks to our format
+        const tasks = action.payload.map((task: ApiTask): TaskType => ({
+          id: task._id,
+          title: task.title,
+          product_ideal_id: task.product_ideal_id,
+          product_types: task.product_types,
+          seller_id: task.seller_id,
+          dropbox: task.dropbox,
+          designer_id: task.designer_id,
+          images: task.images,
+          banner: task.banner,
+          status: task.status,
+          seller_note: task.seller_note,
+          comments: task.comments || []
+        }))
+
+        // Update tasks
+        state.tasks = tasks
+
+        // Reset all column taskIds
+        state.columns = state.columns.map(column => ({
+          ...column,
+          taskIds: []
+        }))
+
+        // Update column taskIds based on status
+        tasks.forEach(task => {
+          const column = state.columns.find(col => col.status === task.status)
+          if (column) {
+            column.taskIds.push(task.id)
+          }
+        })
+      })
+      .addCase(fetchDesignsThunk.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.error.message || 'Failed to fetch designs'
+      })
+  }
+})
+
+export const {
+  editColumn,
+  deleteColumn,
+  updateColumns,
+  updateColumnTaskIds,
+  getCurrentTask,
+  updateSingleTask,
+  deleteDesign,
+  setProductTypes,
+  updateTaskDropbox,
+  updateTaskComments,
+  updateTask
+} = designSlice.actions
+
+export default designSlice.reducer

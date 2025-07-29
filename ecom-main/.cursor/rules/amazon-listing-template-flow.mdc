@@ -1,0 +1,57 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Amazon Listing Template Flow
+
+## Template Creation Flow
+1. User enters basic template information:
+   - Name (required)
+   - Description
+   - Market (default: amazon)
+   - Status (active/inactive)
+
+2. For Amazon market:
+   - User uploads template file (XLSX, XLS, CSV)
+   - File must have sheet named "Template"
+   - First column in row 3 must be "feed_product_type"
+   - Row 4 contains default values for columns
+
+3. Template Columns Display:
+   - Shows all columns from uploaded file
+   - Each column has:
+     - Index
+     - Column Name
+     - Description
+     - Default Value (Select dropdown with custom text input)
+
+4. Default Value Options:
+   - Select from predefined options:
+     - product_title
+     - description
+     - short_description
+     - main_image
+     - image_1
+     - image_2
+     - image_3
+     - image_4
+     - image_5
+     - image_6
+     - image_7
+     - image_8
+     - image_9
+     - image_10
+   - Or enter custom text value
+
+5. File Upload Process:
+   - Shows progress bar during upload
+   - Validates file format and content
+   - Displays success/error messages
+   - Updates template columns table
+
+6. Template Creation:
+   - Validates required fields
+   - Sends template data to API
+   - Handles success/error responses
+   - Closes form on success

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopify Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .test-info {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .test-button {
+            background: #4F46E5;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .test-button:hover {
+            background: #3a3a9c;
+        }
+
+        /* Toast CSS */
+        .exp-spy-snackbar {
+            visibility: hidden;
+            min-width: 300px;
+            max-width: 400px;
+            margin-left: -150px;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 16px 20px;
+            position: fixed;
+            z-index: 10000;
+            left: 50%;
+            bottom: 30px;
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 1.4;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .exp-spy-snackbar.show {
+            visibility: visible;
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .exp-spy-snackbar.show.success {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border-color: rgba(76, 175, 80, 0.3);
+        }
+
+        .exp-spy-snackbar.show.error {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: white;
+            border-color: rgba(244, 67, 54, 0.3);
+        }
+
+        .exp-spy-snackbar.show.info {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            border-color: rgba(33, 150, 243, 0.3);
+        }
+
+        .exp-spy-snackbar.show.warning {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: white;
+            border-color: rgba(255, 152, 0, 0.3);
+        }
+
+        /* Hover effect */
+        .exp-spy-snackbar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Icon support */
+        .exp-spy-snackbar::before {
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            vertical-align: middle;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .exp-spy-snackbar.show.success::before {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E");
+        }
+
+        .exp-spy-snackbar.show.error::before {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E");
+        }
+
+        .exp-spy-snackbar.show.info::before {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z'/%3E%3C/svg%3E");
+        }
+
+        .exp-spy-snackbar.show.warning::before {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z'/%3E%3C/svg%3E");
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .exp-spy-snackbar {
+                min-width: 280px;
+                max-width: 320px;
+                margin-left: -140px;
+                font-size: 13px;
+                padding: 14px 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .exp-spy-snackbar {
+                min-width: 260px;
+                max-width: 300px;
+                margin-left: -130px;
+                font-size: 12px;
+                padding: 12px 14px;
+                bottom: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="test-info">
+        <h2>Shopify Extension Test Page</h2>
+        <p>This page simulates a Shopify product page to test the extension functionality.</p>
+        <p>URL: <code>https://test-shop.myshopify.com/products/test-product</code></p>
+    </div>
+
+    <button class="test-button" onclick="testMessagePort()">Test Message Port</button>
+    <button class="test-button" onclick="testToast()">Test Toast</button>
+    <button class="test-button" onclick="testToastError()">Test Toast Error</button>
+    <button class="test-button" onclick="testToastSuccess()">Test Toast Success</button>
+    <button class="test-button" onclick="testToastInfo()">Test Toast Info</button>
+    <button class="test-button" onclick="testToastWarning()">Test Toast Warning</button>
+
+    <script>
+        // Helper function for toast notifications (copy from helpers.js)
+        function expToast(type, msg) {
+            console.log(type, msg);
+            let x = document.getElementById("exp-spy-snackbar");
+
+            // Tạo element nếu chưa có
+            if (!x) {
+                x = document.createElement("div");
+                x.id = "exp-spy-snackbar";
+                x.className = "exp-spy-snackbar";
+                document.body.appendChild(x);
+            }
+
+            x.innerText = msg;
+            x.className = "";
+            x.classList.add("show");
+            x.classList.add(type);
+            setTimeout(function () { x.className = ""; }, 3000);
+        }
+
+        // Simulate Shopify product page structure
+        document.addEventListener('DOMContentLoaded', function () {
+            // Create a mock product structure
+            const mockProduct = {
+                title: 'Test Product',
+                handle: 'test-product',
+                images: [
+                    { src: 'https://via.placeholder.com/400x400', width: 400 },
+                    { src: 'https://via.placeholder.com/500x500', width: 500 }
+                ],
+                image: { src: 'https://via.placeholder.com/400x400', width: 400 }
+            };
+
+            // Mock the Shopify API response
+            window.mockShopifyAPI = {
+                product: mockProduct
+            };
+
+            console.log('Test page loaded');
+        });
+
+        function testMessagePort() {
+            console.log('Testing message port...');
+            if (typeof chrome !== 'undefined' && chrome.runtime) {
+                chrome.runtime.sendMessage({
+                    action: 'xhttp',
+                    method: 'GET',
+                    url: 'https://jsonplaceholder.typicode.com/posts/1'
+                }, function (response) {
+                    console.log('Message port response:', response);
+                    if (chrome.runtime.lastError) {
+                        console.error('Message port error:', chrome.runtime.lastError);
+                        expToast('error', 'Message port error: ' + chrome.runtime.lastError.message);
+                    } else {
+                        expToast('success', 'Message port test successful');
+                    }
+                });
+            } else {
+                expToast('error', 'Chrome runtime not available');
+            }
+        }
+
+        function testToast() {
+            console.log('Testing toast...');
+            expToast('success', 'Test toast message');
+        }
+
+        function testToastError() {
+            console.log('Testing toast error...');
+            expToast('error', 'Test error message');
+        }
+
+        function testToastSuccess() {
+            console.log('Testing toast success...');
+            expToast('success', 'Test success message');
+        }
+
+        function testToastInfo() {
+            console.log('Testing toast info...');
+            expToast('info', 'Test info message');
+        }
+
+        function testToastWarning() {
+            console.log('Testing toast warning...');
+            expToast('warning', 'Test warning message');
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,137 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Frontend Development Rules and Guidelines
+
+## Package Management
+- Use **yarn** to install and manage dependencies for the frontend. Do not use npm.
+
+## Project Structure
+- All source code should be placed in the `src` directory
+- Follow the established directory structure:
+  - `@core/`: Core functionality and shared components
+  - `@layouts/`: Layout components and templates
+  - `@menu/`: Navigation and menu components
+  - `app/`: Main application code
+  - `assets/`: Static assets (images, fonts, etc.)
+  - `components/`: Reusable UI components
+  - `configs/`: Configuration files
+  - `contexts/`: React context providers
+  - `data/`: Static data and constants
+  - `hocs/`: Higher-order components
+  - `hooks/`: Custom React hooks
+  - `libs/`: Third-party library configurations
+  - `redux-store/`: Redux store configuration and slices
+  - `services/`: API services and external integrations
+  - `types/`: TypeScript type definitions
+  - `utils/`: Utility functions
+  - `views/`: Page components and views
+
+## Code Style and Best Practices
+
+### General Rules
+1. Use TypeScript for all new code
+2. Follow ESLint and Prettier configurations
+3. Use functional components with hooks instead of class components
+4. Keep components small and focused on a single responsibility
+5. Use meaningful and descriptive names for components, functions, and variables
+
+### Component Guidelines
+1. Each component should be in its own directory with the following structure:
+   ```
+   ComponentName/
+   ├── index.tsx
+   ├── ComponentName.tsx
+   ├── ComponentName.test.tsx
+   ├── ComponentName.styles.ts (if using styled-components)
+   └── types.ts
+   ```
+
+2. Props should be properly typed using TypeScript interfaces
+3. Use prop-types for runtime prop validation
+4. Implement proper error boundaries
+5. Follow the container/presentational pattern when appropriate
+
+### Page Layout Guidelines
+1. Basic Page Structure:
+   - Use Material-UI `Card` component as the main container
+   - Include a header section with title and actions
+   - Implement a search/filter section when needed
+   - Use tables for data display with proper pagination
+   - Include action buttons for CRUD operations
+
+2. Header Section:
+   - Place page title in a prominent position
+   - Include action buttons (Add, Edit, Delete) in the header
+   - Use consistent spacing with `mb-6` for margin-bottom
+
+3. Search and Filter Section:
+   - Implement search functionality using `DebouncedInput` component
+   - Place search and action buttons in a flex container
+   - Use consistent spacing with `gap-4` for button spacing
+   - Make search responsive with `max-sm:is-full` class
+
+4. Table Layout:
+   - Use Material-UI `Table` components for data display
+   - Include proper column headers
+   - Implement loading states
+   - Show empty state messages when no data is available
+   - Use consistent cell formatting for different data types
+
+5. Action Buttons:
+   - Use Material-UI `Button` components
+   - Implement consistent button sizes and variants
+   - Group related actions together
+   - Use appropriate icons for actions
+   - Include confirmation dialogs for destructive actions
+   - For delete actions:
+     * Use red color (color="error") for delete buttons
+     * Use trash icon from Tabler Icons
+     * Implement confirmation dialog with:
+       - Clear title "Delete [Item]"
+       - Warning message about irreversible action
+       - Cancel and Delete buttons
+       - Delete button should be red and contained
+     * Handle loading state during deletion
+     * Show success/error toast notifications
+     * Refresh data after successful deletion
+     * Handle errors gracefully with proper error messages
+
+6. Modal and Dialog Components:
+   - Use consistent modal components for forms
+   - Implement proper form validation
+   - Include success/error notifications
+   - Handle loading states during API calls
+
+7. Responsive Design:
+   - Use Tailwind CSS classes for responsive layouts
+   - Implement proper spacing on different screen sizes
+   - Make tables scrollable on mobile devices
+   - Adjust button and input sizes for mobile views
+
+8. State Management:
+   - Use React hooks for local state management
+   - Implement proper loading states
+   - Handle error states gracefully
+   - Use react-toastify notifications for user feedback
+
+9. API Integration:
+   - Use axios instance for API calls
+   - Implement proper error handling
+   - Show loading states during API calls
+   - Refresh data after successful operations
+
+10. Image Handling:
+    - Use proper image optimization
+    - Implement lightbox for image previews
+    - Use consistent image sizes and aspect ratios
+    - Include proper alt text for accessibility
+
+

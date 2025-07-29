@@ -1,0 +1,40 @@
+FROM continuumio/miniconda3:latest
+
+WORKDIR /app
+
+# Create and activate conda environment
+RUN conda create -n ecom python=3.10 -y && \
+    echo "source /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
+    echo "conda activate ecom" >> ~/.bashrc
+
+# Set up environment variables
+ENV PATH /opt/conda/envs/ecom/bin:$PATH
+ENV CONDA_DEFAULT_ENV ecom
+ENV CONDA_PREFIX /opt/conda/envs/ecom
+
+# Install system dependencies for OpenCV
+RUN apt-get update && apt-get install -y \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first to leverage Docker cache
+COPY requirements.txt .
+RUN . /opt/conda/etc/profile.d/conda.sh && \
+    conda activate ecom && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY . .
+
+# Create non-root user
+RUN useradd -m -u 1000 appuser && \
+    chown -R appuser:appuser /app
+USER appuser
+
+# Set up volume for images
+VOLUME /app/images
+
+# Run the image processing service
+CMD ["/bin/bash", "-c", ". /opt/conda/etc/profile.d/conda.sh && conda activate ecom && python app/image_processor/service.py"] 

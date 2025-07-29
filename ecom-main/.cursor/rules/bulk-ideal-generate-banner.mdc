@@ -1,0 +1,276 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Bulk Ideal Generate Banner Functionality
+
+## Overview
+This rule defines the implementation guidelines for the bulk ideal banner generation feature, which allows users to generate banners for multiple ideals simultaneously.
+
+## Component Structure
+- Location: `frontend/src/components/BulkIdealGenerateBanner`
+- Main Component: `BulkIdealGenerateBannerDialog`
+
+## Component Structure
+```
+BulkIdealGenerateBanner/
+├── index.tsx
+├── BulkIdealGenerateBannerDialog.tsx
+├── BulkIdealGenerateBannerDialog.styles.ts
+└── types.ts
+```
+
+## Backend Routes
+
+### 1. Ideals List Endpoint
+```python
+@bp.route('/api/authenticated/ideals/list', methods=['GET'])
+def list():
+    try:
+        # Query parameters
+        limit = request.args.get('limit', default=None)  # Default 50
+        page = request.args.get('page', default=1)
+        search = request.args.get('search', "").strip()
+        sort = request.args.get('sort', '').strip()
+        sortBy = request.args.get('sort-by', '').strip()
+        
+        # Get user and team info
+        userId = get_jwt_identity()
+        user = find(userId, 'users', 'user_id')
+        
+        # Build query
+        mongo_query = {}
+        if search:
+            mongo_query['title'] = {"$regex": search.lower(), "$options": "i"}
+        if user and 'team_id' in user:
+            mongo_query['team_ids'] = str(user['team_id'])
+            
+        # Build sort
+        mongo_sort = [('_id', 1)]  # Default sort by _id
+        if sort and sortBy:
+            mongo_sort = [(sort['query'], 1 if sort['value'] == 'asc' else -1)]
+            
+        # Get data
+        table = connect_database()['product_ideals']
+        skip = (int(page) - 1) * int(limit)
+        total = table.count_documents(mongo_query)
+        cursor = table.find(mongo_query).sort(mongo_sort).skip(skip).limit(int(limit))
+        results = [doc for doc in cursor]
+        
+        # Convert ObjectId to string
+        for item in results:
+            item['_id'] = str(item['_id'])
+            
+        return jsonify({
+            'data': results,
+            'total': total,
+            'page': int(page),
+            'limit': int(limit),
+            'total_pages': (total + int(limit) - 1) // int(limit)
+        })
+    except Exception as exception:
+        return jsonify({
+            "error": f"Error when get data: {str(exception)}"
+        }), 500
+```
+
+### 2. Mockups List Endpoint
+```python
+@bp.route('/api/authenticated/mockup/list', methods=['GET'])
+def list():
+    try:
+        # Query parameters
+        limit = request.args.get('limit', default=None)  # Default 50
+        page = request.args.get('page', default=1)
+        search = request.args.get('search', "").strip()
+        sort = request.args.get('sort', '').strip()
+        sortBy = request.args.get('sort-by', '').strip()
+        
+        # Get user and team info
+        userId = get_jwt_identity()
+        user = find(userId, 'users', 'user_id')
+        
+        # Build query
+        mongo_query = {}
+        if search:
+            mongo_query['name'] = {"$regex": search.lower(), "$options": "i"}
+        if user and 'team_id' in user:
+            mongo_query['team_ids'] = str(user['team_id'])
+            
+        # Build sort
+        mongo_sort = [('_id', 1)]  # Default sort by _id
+        if sort and sortBy:
+            mongo_sort = [(sort['query'], 1 if sort['value'] == 'asc' else -1)]
+            
+        # Get data
+        table = connect_database()['mockups']
+        skip = (int(page) - 1) * int(limit)
+        total = table.count_documents(mongo_query)
+        cursor = table.find(mongo_query).sort(mongo_sort).skip(skip).limit(int(limit))
+        results = [doc for doc in cursor]
+        
+        # Convert ObjectId to string
+        for item in results:
+            item['_id'] = str(item['_id'])
+            
+        return jsonify({
+            'data': results,
+            'total': total,
+            'page': int(page),
+            'limit': int(limit),
+            'total_pages': (total + int(limit) - 1) // int(limit)
+        })
+    except Exception as exception:
+        return jsonify({
+            "error": f"Error when get data: {str(exception)}"
+        }), 500
+```
+
+### 3. Product Types Endpoint
+```python
+@bp.route('/products/product-types', methods=['GET'])
+def get_product_types():
+    try:
+        # Get user and team info
+        userId = get_jwt_identity()
+        user = find(userId, 'users', 'user_id')
+        
+        # Build query
+        mongo_query = {}
+        if user and 'team_id' in user:
+            mongo_query['team_ids'] = str(user['team_id'])
+            
+        # Get data
+        table = connect_database()['product_types']
+        cursor = table.find(mongo_query)
+        results = {str(doc['_id']): doc['name'] for doc in cursor}
+            
+        return jsonify({
+            'result': results
+        })
+    except Exception as exception:
+        return jsonify({
+            "error": f"Error when get data: {str(exception)}"
+        }), 500
+```
+
+## Dialog Implementation
+- Use Material-UI `Dialog` component as the base
+- Dialog should be responsive and centered on screen
+- Dialog should be large (minWidth 900px, maxWidth="lg")
+- Include proper loading states and error handling
+- **Do not use `@mui/icons-material/Close`. You may use a text button or any other icon for the close button and the remove image button.**
+- **Ideals và mockups phải fetch từ backend bằng axiosInstance, không dùng fetch.**
+
+## Required Props
+```typescript
+interface BulkIdealGenerateBannerDialogProps {
+  open: boolean;
+  onClose: () => void;
+  selectedIdeals: Ideal[];
+  onSuccess?: () => void;
+}
+```
+
+## Dialog Content Structure
+1. Header Section
+   - Title: "Generate Banners for Selected Ideals"
+   - Close button in top-right corner (text or custom icon, not @mui/icons-material/Close)
+
+2. Content Section
+   - Ideal Selection
+     - Search box để filter ideals theo tên
+     - Danh sách ideals có thể chọn nhiều (checkbox/multi-select)
+     - Hiển thị banner của ideal bên cạnh tên (40x40px)
+     - Lưu lại danh sách các ideal đã chọn vào state
+     - **Ideals phải fetch từ backend bằng axiosInstance khi dialog mở, không lấy từ prop.**
+   - Image Upload Section
+     - Mỗi ideal đã chọn có một dropzone riêng
+     - Dropzone hiển thị preview ảnh (120x120px) sau khi upload
+     - Hiển thị tên file bên dưới preview
+     - Maximum file size: 20MB per image
+     - Accepted formats: PNG only
+     - Có thể xóa ảnh đã upload
+   - Product Type Selection
+     - Use Material-UI `Autocomplete` component
+     - Required field
+     - **productTypes phải là object dạng `{ id: name }`, không phải array.**
+     - Options should be fetched from product types API
+     - **When dialog is opened, always fetch product types from `/products/product-types` route (do not cache, do not get from parent).**
+     - Có thể search trong dropdown
+   - Mockup Selection
+     - Use Material-UI `Autocomplete` component
+     - **Mockups phải fetch từ backend bằng axiosInstance khi dialog mở, không dùng fetch.**
+     - Fetch mockup list from `/api/authenticated/mockup/list`
+     - Lưu mockup đã chọn vào state
+     - Có thể search trong dropdown
+
+3. Action Buttons
+   - "Cancel" button (left)
+   - "Create Actions" button (right, primary)
+   - Disable "Create Actions" button when:
+     - No images uploaded
+     - No product type selected
+     - No ideal selected
+     - During API call
+
+## State Management
+- Track uploaded images for each ideal separately
+- Track selected product type
+- Track selected ideals
+- Track selected mockup
+- Track loading state
+- Track error state
+
+## API Integration
+- Endpoint: POST `/api/design-actions`
+- Payload structure:
+```typescript
+interface GenerateBannerActionPayload {
+  type: 'generate_banner';
+  ideals: string[]; // Array of ideal IDs
+  images: File[];
+  product_type: string;
+  mockup_id?: string;
+}
+```
+
+## Error Handling
+- Show error messages using react-toastify notifications
+- Handle file upload errors
+- Handle API errors
+- Validate file types and sizes before upload
+
+## Success Flow
+1. On successful API call:
+   - Show success notification
+   - Close dialog
+   - Trigger onSuccess callback if provided
+   - Refresh ideals list if needed
+
+## Styling Guidelines
+- Use consistent spacing (gap-4 for button groups)
+- Implement proper loading states
+- Use Material-UI theme colors
+- Follow responsive design principles
+- Preview images should be centered and properly sized
+- Dropzone should have clear visual feedback for drag states
+
+## Accessibility
+- Proper ARIA labels
+- Keyboard navigation support
+- Focus management
+- Screen reader support
+
+## Testing Requirements
+- Unit tests for component rendering
+- Integration tests for file upload
+- API integration tests
+- Error handling tests
+- Accessibility tests
+
+# Your rule content
+
+- You can @ files here
+- You can use markdown but dont have to

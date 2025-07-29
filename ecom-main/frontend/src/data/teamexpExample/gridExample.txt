@@ -1,0 +1,107 @@
+import Grid from '@mui/material/Grid2'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import Chip from '@mui/material/Chip'
+import Button from '@mui/material/Button'
+import FormControl from '@mui/material/FormControl'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import LinearProgress from '@mui/material/LinearProgress'
+import MenuItem from '@mui/material/MenuItem'
+import Pagination from '@mui/material/Pagination'
+import Select from '@mui/material/Select'
+import Switch from '@mui/material/Switch'
+import Typography from '@mui/material/Typography'
+
+{data.length > 0 ? (
+    <Grid container spacing={6}>
+      {data.slice(activePage * 6, activePage * 6 + 6).map((item, index) => (
+        <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
+          <div className='border rounded bs-full'>
+            <div className='pli-2 pbs-2'>
+              <Link href={getLocalizedUrl('/apps/academy/course-details', locale as Locale)} className='flex'>
+                <img src={item.tutorImg} alt={item.courseTitle} className='is-full' />
+              </Link>
+            </div>
+            <div className='flex flex-col gap-4 p-5'>
+              <div className='flex items-center justify-between'>
+                <Chip label={item.tags} variant='tonal' size='small' color={chipColor[item.tags].color} />
+                <div className='flex items-start'>
+                  <Typography className='font-medium mie-1'>{item.rating}</Typography>
+                  <i className='tabler-star-filled text-warning mie-2' />
+                  <Typography>{`(${item.ratingCount})`}</Typography>
+                </div>
+              </div>
+              <div className='flex flex-col gap-1'>
+                <Typography
+                  variant='h5'
+                  component={Link}
+                  href={getLocalizedUrl('/apps/academy/course-details', locale as Locale)}
+                  className='hover:text-primary'
+                >
+                  {item.courseTitle}
+                </Typography>
+                <Typography>{item.desc}</Typography>
+              </div>
+              <div className='flex flex-col gap-1'>
+                {item.completedTasks === item.totalTasks ? (
+                  <div className='flex items-center gap-1'>
+                    <i className='tabler-check text-xl text-success' />
+                    <Typography color='success.main'>Completed</Typography>
+                  </div>
+                ) : (
+                  <div className='flex items-center gap-1'>
+                    <i className='tabler-clock text-xl' />
+                    <Typography>{`${item.time}`}</Typography>
+                  </div>
+                )}
+                <LinearProgress
+                  color='primary'
+                  value={Math.floor((item.completedTasks / item.totalTasks) * 100)}
+                  variant='determinate'
+                  className='is-full bs-2'
+                />
+              </div>
+              {item.completedTasks === item.totalTasks ? (
+                <Button
+                  variant='tonal'
+                  startIcon={<i className='tabler-rotate-clockwise-2' />}
+                  component={Link}
+                  href={getLocalizedUrl('/apps/academy/course-details', locale as Locale)}
+                >
+                  Start Over
+                </Button>
+              ) : (
+                <div className='flex flex-wrap gap-4'>
+                  <Button
+                    fullWidth
+                    variant='tonal'
+                    color='secondary'
+                    startIcon={<i className='tabler-rotate-clockwise-2' />}
+                    component={Link}
+                    href={getLocalizedUrl('/apps/academy/course-details', locale as Locale)}
+                    className='is-auto flex-auto'
+                  >
+                    Start Over
+                  </Button>
+                  <Button
+                    fullWidth
+                    variant='tonal'
+                    endIcon={
+                      <DirectionalIcon ltrIconClass='tabler-chevron-right' rtlIconClass='tabler-chevron-left' />
+                    }
+                    component={Link}
+                    href={getLocalizedUrl('/apps/academy/course-details', locale as Locale)}
+                    className='is-auto flex-auto'
+                  >
+                    Continue
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </Grid>
+      ))}
+    </Grid>
+  ) : (
+    <Typography className='text-center'>No courses found</Typography>
+  )}

@@ -1,0 +1,164 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Hướng dẫn Setup MCP Server cho Flask Testing với Conda
+
+## 1. Chuẩn bị môi trường Conda
+
+### Activate conda environment
+```bash
+conda activate ecom
+```
+
+### Cài đặt dependencies
+```bash
+conda install flask requests pytest
+pip install mcp pydantic
+```
+
+## 2. Tạo thư mục project
+
+```bash
+mkdir flask-mcp-server
+cd flask-mcp-server
+```
+
+## 3. Cấu trúc thư mục
+
+```
+flask-mcp-server/
+├── mcp_server.py           # MCP server chính
+├── flask_tester.py         # Module test Flask
+├── requirements.txt        # Dependencies
+├── config.json            # Cấu hình MCP server
+└── your_flask_app.py      # Flask app cần test
+```
+
+## 4. Tạo file cấu hình
+
+### requirements.txt
+```
+mcp>=1.0.0
+flask>=2.3.0
+requests>=2.31.0
+pytest>=7.4.0
+pydantic>=2.0.0
+```
+
+### config.json
+```json
+{
+  "server_name": "flask-tester",
+  "version": "1.0.0",
+  "description": "MCP Server for Flask Testing",
+  "conda_env": "ecom",
+  "flask_app": {
+    "file": "your_flask_app.py",
+    "port": 5000,
+    "host": "localhost"
+  }
+}
+```
+
+## 5. Các file cần tạo
+
+### 1. mcp_server.py
+**Chức năng chính:**
+- Implement MCP server protocol
+- Định nghĩa các tools:
+  - `run_flask_test`: Chạy test functions
+  - `send_http_request`: Gửi HTTP requests
+  - `check_app_status`: Kiểm tra trạng thái app
+  - `start_flask_app`: Khởi động Flask app
+  - `stop_flask_app`: Dừng Flask app
+
+### 2. flask_tester.py
+**Chức năng chính:**
+- Class `FlaskTester` để quản lý Flask app
+- Methods:
+  - `start_app()`: Khởi động app
+  - `stop_app()`: Dừng app
+  - `send_request()`: Gửi HTTP request
+  - `run_test_function()`: Chạy test function
+  - `get_app_status()`: Kiểm tra status
+## 6. Cấu hình MCP trong Cursor
+
+### Thêm vào settings.json của Cursor
+```json
+{
+  "mcp.servers": {
+    "flask-tester": {
+      "command": "conda",
+      "args": ["run", "-n", "ecom", "python", "path/to/mcp_server.py"],
+      "cwd": "path/to/flask-mcp-server"
+    }
+  }
+}
+```
+
+## 7. Các bước triển khai
+
+### Bước 1: Tạo files
+1. Tạo `mcp_server.py` với MCP protocol implementation
+2. Tạo `flask_tester.py` với Flask testing utilities
+3. Tạo `config.json` với cấu hình
+
+### Bước 2: Test local
+```bash
+# Trong conda environment ecom
+conda activate ecom
+python mcp_server.py
+```
+
+### Bước 3: Cấu hình Cursor
+1. Mở Cursor settings
+2. Thêm MCP server configuration
+3. Restart Cursor
+
+### Bước 4: Sử dụng
+1. Mở project Flask trong Cursor
+2. Sử dụng các MCP tools trong chat:
+   - "Start Flask app"
+   - "Send GET request to /api/users"
+   - "Run test function test_user_creation"
+   - "Check app status"
+
+## 8. Tools sẽ có sẵn
+
+- **start_flask_app**: Khởi động Flask application
+- **stop_flask_app**: Dừng Flask application  
+- **send_http_request**: Gửi HTTP request (GET, POST, PUT, DELETE)
+- **run_test_function**: Chạy một test function cụ thể
+- **check_app_status**: Kiểm tra trạng thái ứng dụng
+- **get_app_logs**: Lấy logs từ Flask app
+
+## 9. Environment Variables (tùy chọn)
+
+### .env file
+```
+FLASK_ENV=development
+FLASK_DEBUG=True
+FLASK_PORT=5000
+MCP_SERVER_PORT=8080
+```
+
+## 10. Troubleshooting
+
+### Kiểm tra conda environment
+```bash
+conda info --envs
+conda list -n ecom
+```
+
+### Test MCP server
+```bash
+conda activate ecom
+python -c "import mcp; print('MCP installed successfully')"
+```
+
+### Debug MCP connection
+- Kiểm tra logs trong Cursor output panel
+- Verify MCP server process đang chạy
+- Check port conflicts

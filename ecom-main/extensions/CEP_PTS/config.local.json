@@ -1,0 +1,18 @@
+{
+    "server": {
+      "baseUrl": "http://localhost:5000",
+      "endpoints": {
+        "actions": "/api/designs/actions",
+        "response_results": "/api/designs/actions/update-products"
+      }
+    },
+    "infor":{
+      "node_name": "PC_HMCROFT"
+    },
+    "aws":{
+      "bucket": "expecomsystem",
+      "AWS_ACCESS_KEY_ID": "AKIAYD7NIYDPO266V6SW",
+      "AWS_SECRET_ACCESS_KEY": "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",
+      "AWS_DEFAULT_REGION": "ap-southeast-1"
+    }
+} 

@@ -1,0 +1,257 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Ideal Management Rules
+
+## 1. Form Thêm Ideal (AddIdealDialog)
+
+### 1.1 Cấu trúc Dialog
+- Dialog fullWidth với maxWidth='md'
+- Chia làm 2 phần: Basic Information (trái) và Advanced Configuration (phải)
+- Responsive: 2 cột trên desktop, 1 cột trên mobile
+
+### 1.2 Thông tin cơ bản (Basic Information)
+#### 1.2.1 Tên Ideal (Title)
+- Bắt buộc nhập
+- Text field đơn dòng
+- Label hiển thị "Title"
+- Validation: Không được để trống
+- Hiển thị error message khi validation fail
+
+#### 1.2.2 Mô tả (Description)
+- Tùy chọn
+- Text field đa dòng (4 dòng)
+- Label hiển thị "Description"
+- Có thể nhập nhiều dòng
+
+#### 1.2.3 Thị trường (Market)
+- Select field bắt buộc
+- Các lựa chọn:
+  - Amazon
+  - Etsy
+  - TikTok
+  - eBay
+- Mặc định: Amazon
+- Validation: Bắt buộc chọn
+
+#### 1.2.4 Cửa hàng (Store)
+- Text field tùy chọn
+- Label hiển thị "Store"
+- Có thể nhập tên cửa hàng
+
+### 1.3 Cấu hình nâng cao (Advanced Configuration)
+#### 1.3.1 Banner URL
+- Text field tùy chọn
+- Label hiển thị "Banner URL"
+- Placeholder: "https://example.com/banner.jpg"
+- Có thể nhập URL banner
+
+#### 1.3.2 PNG URL
+- Text field tùy chọn
+- Label hiển thị "PNG URL"
+- Placeholder: "https://example.com/image.png"
+- Có thể nhập URL hình ảnh PNG
+
+#### 1.3.3 Etsy Tags
+- Text field tùy chọn
+- Label hiển thị "Etsy Tags"
+- Placeholder: "tag1, tag2, tag3"
+- Helper text: "Separate tags with commas"
+- Dùng cho thị trường Etsy
+
+### 1.4 Xử lý form
+#### 1.4.1 Validation
+- Kiểm tra các trường bắt buộc (Title, Market)
+- Hiển thị error message dưới field
+- Clear error khi user bắt đầu nhập
+
+#### 1.4.2 Submit form
+- Gọi API POST `/api/authenticated/ideals/create`
+- Gửi formData + user_id
+- Hiển thị loading state
+- Xử lý success/error response
+
+#### 1.4.3 Xử lý response
+- Success: Hiển thị toast success, đóng dialog, refresh danh sách
+- Error: Hiển thị toast error với message từ server
+- Loading: Disable button, hiển thị "Creating..."
+
+### 1.5 State Management
+#### 1.5.1 Local state
+- formData: Quản lý dữ liệu form
+- isLoading: Trạng thái loading
+- errors: Quản lý validation errors
+
+#### 1.5.2 Props
+- open: Boolean để mở/đóng dialog
+- onClose: Callback khi đóng dialog
+- onSuccess: Callback khi tạo thành công
+
+### 1.6 UI/UX
+#### 1.6.1 Layout
+- Grid system với spacing={3}
+- Alert info ở cuối form
+- Dialog actions với Cancel và Create button
+
+#### 1.6.2 Responsive
+- xs: 1 cột
+- md: 2 cột
+
+## 2. Integration với IdealBlock
+
+### 2.1 Nút Add Ideal
+- Đặt bên cạnh nút "Bulk Generate Banner"
+- Button variant='contained' color='primary'
+- Text: "Add Ideal"
+- Click mở AddIdealDialog
+
+### 2.2 State Management
+- openAddIdealDialog: Boolean state
+- handleCloseAddIdealModal: Function đóng dialog
+- onSuccess callback: Gọi fetchProducts để refresh danh sách
+
+### 2.3 Layout
+- Wrap 2 buttons trong div với flex gap-2
+- "Add Ideal" button trước "Bulk Generate Banner"
+- "Bulk Generate Banner" đổi thành variant='outlined'
+
+## 3. Ideal Filters Component
+
+### 3.1 Cấu trúc Component
+- File: `src/views/apps/ideals/components/IdealFilters.tsx`
+- Component riêng biệt để quản lý tất cả filters
+- Responsive design với Grid system
+
+### 3.2 Filter Types
+#### 3.2.1 Sort Filters
+- **Views**: Sắp xếp theo lượt xem
+- **Avg Views**: Sắp xếp theo lượt xem trung bình
+- **Sold**: Sắp xếp theo số lượng bán
+- **Favorites**: Sắp xếp theo lượt yêu thích
+
+#### 3.2.2 Filter Options
+- **My Favorites**: Lọc theo favorites của user
+- **My Ideals**: Lọc theo ideals của user
+
+### 3.3 UI Features
+#### 3.3.1 Filter Display
+- Label rõ ràng cho từng filter
+- Size='small' để tiết kiệm không gian
+- Options: "All", "High to Low", "Low to High"
+
+#### 3.3.2 Active Filters
+- Hiển thị chips cho các filter đang active
+- Có thể xóa từng filter riêng lẻ
+- Button "Clear All" để xóa tất cả
+
+#### 3.3.3 Responsive Layout
+- xs: 1 cột (stacked)
+- sm: 2 cột
+- md: 3 cột
+- Spacing={2} để compact
+
+### 3.4 State Management
+#### 3.4.1 Props Interface
+```typescript
+interface IdealFiltersProps {
+  sortValues: SortValues
+  valueFavorites: string
+  valueMyIdeal: string
+  onSortChange: (key: string, value: string) => void
+  onClearFilters: () => void
+}
+```
+
+#### 3.4.2 Callback Functions
+- `onSortChange`: Xử lý thay đổi filter
+- `onClearFilters`: Xóa tất cả filters
+- Auto refresh data khi filter thay đổi
+
+### 3.5 Integration với IdealBlock
+- Import và sử dụng IdealFilters component
+- Truyền state và callbacks từ parent
+- Thay thế toàn bộ Grid filter cũ
+- Giảm code complexity trong IdealBlock
+
+## 4. API Integration
+
+### 4.1 Endpoint
+- POST `/api/authenticated/ideals/create`
+- Headers: Authorization token
+- Body: formData + user_id
+
+### 4.2 Request Format
+```json
+{
+  "title": "string",
+  "description": "string",
+  "market": "amazon|etsy|tiktok|ebay",
+  "store": "string",
+  "banner": "string",
+  "png": "string",
+  "hey_etsy_tags": "string",
+  "user_id": "string"
+}
+```
+
+### 4.3 Response Format
+- Success: `{ "response": "success" }`
+- Error: `{ "message": "error message" }`
+
+## 5. Error Handling
+
+### 5.1 Validation Errors
+- Hiển thị dưới field tương ứng
+- Clear khi user bắt đầu nhập
+- Prevent submit nếu có errors
+
+### 5.2 API Errors
+- Hiển thị toast error
+- Log error chi tiết
+- Giữ dialog mở để user có thể sửa
+
+### 5.3 Network Errors
+- Hiển thị generic error message
+- Cho phép retry
+
+## 6. Performance Optimization
+
+### 6.1 Memoization
+- Sử dụng useCallback cho các handlers
+- Tối ưu re-render với React.memo
+
+### 6.2 Loading States
+- Disable button khi loading
+- Hiển thị loading text
+- Prevent multiple submissions
+
+## 7. Accessibility
+
+### 7.1 ARIA Labels
+- Dialog có aria-labelledby
+- Form fields có proper labels
+- Error messages có aria-describedby
+
+### 7.2 Keyboard Navigation
+- Tab navigation hoạt động đúng
+- Enter key submit form
+- Escape key đóng dialog
+
+## 8. Testing Considerations
+
+### 8.1 Unit Tests
+- Test validation logic
+- Test form submission
+- Test error handling
+
+### 8.2 Integration Tests
+- Test API integration
+- Test dialog open/close
+- Test success flow
+
+### 8.3 E2E Tests
+- Test complete user flow
+- Test responsive behavior
+- Test error scenarios

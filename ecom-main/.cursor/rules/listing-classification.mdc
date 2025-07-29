@@ -1,0 +1,32 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Flow chức năng phân loại sản phẩm cha và các sản phẩm con
+   người dùng click nút classification
+   hiện diaglog
+## Bước 1: Hiển thị danh sách có phân loại
+
+* **Dialog**: Hiển thị tất cả listing với filter tabs:
+   * Tab "Tất cả"
+   * Tab "Sản phẩm chính" (hiển thị số lượng sản phẩm liên quan)
+   * Tab "Sản phẩm liên quan"
+
+## Bước 2: Action trên từng sản phẩm
+
+* **Với sản phẩm chưa phân loại**: Button "ađ" hoặc "Gán vào sản phẩm chính"
+* **Với sản phẩm chính**: Hiển thị "Quản lý sản phẩm liên quan (30)"
+* **Với sản phẩm liên quan**: Hiển thị "Thuộc về: [Tên sản phẩm chính]" + button "Thay đổi"
+
+## Bước 3: Modal quản lý chi tiết
+
+* Click "Quản lý sản phẩm liên quan" → Mở modal:
+   * Bên trái: Danh sách sản phẩm liên quan hiện tại
+   * Bên phải: Danh sách sản phẩm có thể thêm (chưa được gán)
+
+
+
+
+
+   * Drag & drop hoặc click để thêm/xóa

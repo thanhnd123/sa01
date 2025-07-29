@@ -1,0 +1,211 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Dialog AI Config - Specification
+Dùng Tiếng anh khi tạo dialog
+## Overview
+Dialog cho phép người dùng cấu hình AI settings để viết lại title và description. Người dùng có thể chọn config có sẵn hoặc tạo mới.
+
+## UI Components
+
+### 1. Dialog Structure
+```
+┌─────────────────────────────────────┐
+│ AI Config Settings              [X] │
+├─────────────────────────────────────┤
+│                                     │
+│ [Select Existing Config Section]    │
+│                                     │
+│ ──── OR ────                        │
+│                                     │
+│ [Create New Config Section]         │
+│                                     │
+│           [Cancel] [Save]           │
+└─────────────────────────────────────┘
+```
+
+### 2. Select Existing Config Section
+- **Title:** "Select Existing Configuration"
+- **Component:** Dropdown/Select
+- **Data:** Danh sách các config đã tạo trước đó
+- **Display Format:** Config name + preview của base_description (truncated)
+
+```
+┌─────────────────────────────────────┐
+│ Select Configuration                │
+│ ┌─────────────────────────────────┐ │
+│ │ Product Description v1          │ │
+│ │ Write compelling product des... │ │
+│ └─────────────────────────────────┘ │
+│                                     │
+│ Available Configurations:           │
+│ • Marketing Copy v2                 │
+│ • SEO Optimized                     │
+│ • Technical Specs                   │
+└─────────────────────────────────────┘
+```
+
+### 3. Create New Config Section
+- **Title:** "Create New Configuration"
+- **Fields:**
+  - **Name:** Text input (required)
+  - **Base Description:** Textarea (required)
+
+```
+┌─────────────────────────────────────┐
+│ Create New Configuration            │
+│                                     │
+│ Name *                              │
+│ ┌─────────────────────────────────┐ │
+│ │ Enter config name               │ │
+│ └─────────────────────────────────┘ │
+│                                     │
+│ Base Description *                  │
+│ ┌─────────────────────────────────┐ │
+│ │ Enter base description...       │ │
+│ │                                 │ │
+│ │                                 │ │
+│ └─────────────────────────────────┘ │
+└─────────────────────────────────────┘
+```
+
+## User Flow
+
+### Scenario 1: Select Existing Config
+1. User opens AI Config dialog
+2. Sees list of existing configurations
+3. Clicks on desired config from dropdown
+4. Preview shows selected config details
+5. Clicks "Save" to apply
+6. Dialog closes, selected config is active
+
+### Scenario 2: Create New Config
+1. User opens AI Config dialog
+2. No suitable existing config found
+3. Fills in "Create New" section:
+   - Enters config name
+   - Enters base description
+4. Clicks "Save" to create and apply
+5. New config is saved to user's config list
+6. Dialog closes, new config is active
+
+### Scenario 3: First Time User
+1. User opens dialog
+2. No existing configs available
+3. Only "Create New" section is enabled
+4. Must create first config to proceed
+
+## Data Structure
+
+### Config Object
+```json
+{
+  "id": "uuid",
+  "user_id": "string",
+  "team_id": "string",
+  "name": "string",
+  "type": "string",
+  "data_config": {
+    "base_description": "string"
+  },
+  "created_at": "timestamp",
+  "updated_at": "timestamp"
+}
+```
+
+### API Request/Response
+
+#### Create Config Request
+```json
+POST /api/configs
+{
+  "name": "Product Description v1",
+  "type": "ai_rewrite",
+  "data_config": {
+    "base_description": "Write compelling product descriptions that highlight key features and benefits"
+  }
+}
+```
+
+#### Create Config Response
+```json
+{
+  "success": true,
+  "data": {
+    "id": "config_uuid",
+    "user_id": "user_uuid",
+    "team_id": "team_uuid",
+    "name": "Product Description v1",
+    "type": "ai_rewrite",
+    "data_config": {
+      "base_description": "Write compelling product descriptions that highlight key features and benefits"
+    },
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
+### API Endpoints
+- `GET /api/configs?type=ai_rewrite` - Lấy danh sách config của user/team
+- `POST /api/configs` - Tạo config mới
+- `PUT /api/configs/:id` - Cập nhật config
+- `DELETE /api/configs/:id` - Xóa config
+
+## Validation Rules
+
+### Name Field
+- Required
+- Min length: 3 characters
+- Max length: 50 characters
+- Unique per user
+
+### Base Description Field
+- Required
+- Min length: 10 characters
+- Max length: 1000 characters
+
+## UI States
+
+### Loading State
+- Show skeleton/spinner while fetching existing configs
+- Disable form during save operation
+
+### Error States
+- Network error: Show retry option
+- Validation error: Highlight invalid fields
+- Duplicate name: Show specific error message
+
+### Empty State
+- No existing configs: Hide select section
+- Show encouraging message to create first config
+
+## Accessibility
+- Proper ARIA labels
+- Keyboard navigation support
+- Screen reader friendly
+- Focus management
+
+## Responsive Design
+- Mobile: Stack sections vertically
+- Desktop: Side-by-side layout option
+- Tablet: Adaptive layout
+
+## Backend Integration
+
+### Create Config Flow
+1. User fills form và clicks "Save"
+3. Gửi POST request đến `/api/configs`:
+
+4. Backend xử lý:
+   - tạo file config.py (backend/app/routes/authenticated) hàm store
+   - hàm xử lý viết trong store luôn
+   - Validate input data luôn trong hàm store
+   - Extract user_id từ authentication
+   - Extract team_id từ user context
+   - Lưu vào database
+   - db lưu gồm: user_id:string, team_id:string, name:string, type:string, data_config:object
+   - với request gửi lên từ ai config type là:ai-listing-config
+   - Return created config

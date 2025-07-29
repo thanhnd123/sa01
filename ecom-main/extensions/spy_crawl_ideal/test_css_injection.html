@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test CSS Injection</title>
+</head>
+
+<body>
+    <h1>Test CSS Injection</h1>
+    <p>Mở DevTools Console và chạy các lệnh sau:</p>
+
+    <div id="test-results"></div>
+
+    <script>
+        // Function để kiểm tra CSS injection
+        function checkCSSInjection() {
+            const results = [];
+
+            // 1. Kiểm tra link tags
+            const links = document.querySelectorAll('link[href*="content-scripts.css"]');
+            results.push(`Link tags found: ${links.length}`);
+
+            // 2. Kiểm tra style tags có chứa CSS của toast
+            const styles = document.querySelectorAll('style');
+            let toastCSSFound = false;
+            let extensionCSSFound = false;
+            styles.forEach(style => {
+                if (style.textContent.includes('exp-spy-snackbar')) {
+                    toastCSSFound = true;
+                }
+                if (style.getAttribute('data-extension-css')) {
+                    extensionCSSFound = true;
+                }
+            });
+            results.push(`Toast CSS in style tags: ${toastCSSFound}`);
+            results.push(`Extension CSS injected: ${extensionCSSFound}`);
+
+            // 3. Kiểm tra computed styles
+            const testElement = document.createElement('div');
+            testElement.id = 'exp-spy-snackbar';
+            testElement.className = 'exp-spy-snackbar show success';
+            document.body.appendChild(testElement);
+
+            const computedStyle = window.getComputedStyle(testElement);
+            const hasToastStyles = computedStyle.visibility !== 'visible' ||
+                computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)' ||
+                computedStyle.position !== 'static';
+
+            results.push(`Toast styles applied: ${hasToastStyles}`);
+            results.push(`Computed visibility: ${computedStyle.visibility}`);
+            results.push(`Computed position: ${computedStyle.position}`);
+
+            // Cleanup
+            document.body.removeChild(testElement);
+
+            // 4. Kiểm tra Chrome extension
+            const isExtensionLoaded = typeof chrome !== 'undefined' && chrome.runtime;
+            results.push(`Chrome extension loaded: ${isExtensionLoaded}`);
+
+            // 5. Test toast functionality
+            try {
+                if (typeof expToast === 'function') {
+                    expToast('success', 'Test toast from check function');
+                    results.push('expToast function available: true');
+                } else {
+                    results.push('expToast function available: false');
+                }
+            } catch (error) {
+                results.push(`expToast error: ${error.message}`);
+            }
+
+            // Hiển thị kết quả
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML = '<h3>Kết quả kiểm tra:</h3><ul>' +
+                results.map(result => `<li>${result}</li>`).join('') + '</ul>';
+
+            console.log('CSS Injection Check Results:', results);
+            return results;
+        }
+
+        // Auto run khi page load
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(checkCSSInjection, 1000); // Delay 1s để extension load
+        });
+
+        // Expose function globally
+        window.checkCSSInjection = checkCSSInjection;
+    </script>
+
+    <h3>Hướng dẫn kiểm tra:</h3>
+    <ol>
+        <li>Mở file này trong browser</li>
+        <li>Mở DevTools Console (F12)</li>
+        <li>Chạy lệnh: <code>checkCSSInjection()</code></li>
+        <li>Xem kết quả hiển thị trên trang và trong console</li>
+    </ol>
+
+    <h3>Các lệnh console hữu ích:</h3>
+    <ul>
+        <li><code>checkCSSInjection()</code> - Kiểm tra tổng quát</li>
+        <li><code>document.querySelectorAll('link[href*="content-scripts.css"]')</code> - Tìm link tags</li>
+        <li><code>document.querySelectorAll('style')</code> - Tìm style tags</li>
+        <li><code>typeof chrome</code> - Kiểm tra extension API</li>
+        <li><code>chrome.runtime.id</code> - Lấy extension ID</li>
+    </ul>
+</body>
+
+</html>

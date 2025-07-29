@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Toast Final</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-button {
+            background: #4F46E5;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+
+        .test-button:hover {
+            background: #3a3a9c;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="test-container">
+        <h1>Test Toast Final</h1>
+        <p>Toast element được tạo với id="exp-spy-snackbar"</p>
+
+        <div>
+            <button class="test-button" onclick="testToastSuccess()">Test Success Toast</button>
+            <button class="test-button" onclick="testToastError()">Test Error Toast</button>
+            <button class="test-button" onclick="testToastInfo()">Test Info Toast</button>
+            <button class="test-button" onclick="testToastWarning()">Test Warning Toast</button>
+        </div>
+
+        <div>
+            <button class="test-button" onclick="checkToastElement()">Check Toast Element</button>
+            <button class="test-button" onclick="createToastElement()">Create Toast Element</button>
+        </div>
+    </div>
+
+    <script>
+        // Copy CSS từ helpers.js
+        function injectCSS() {
+            const cssContent = `
+.exp-spy-snackbar {
+  visibility: hidden;
+  min-width: 300px;
+  max-width: 400px;
+  margin-left: -150px;
+  color: #fff;
+  text-align: center;
+  border-radius: 8px;
+  padding: 16px 20px;
+  position: fixed;
+  z-index: 10000;
+  left: 50%;
+  bottom: 30px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.exp-spy-snackbar.show {
+  visibility: visible;
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.exp-spy-snackbar.show.success {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  color: white;
+  border-color: rgba(76, 175, 80, 0.3);
+}
+
+.exp-spy-snackbar.show.error {
+  background: linear-gradient(135deg, #f44336, #d32f2f);
+  color: white;
+  border-color: rgba(244, 67, 54, 0.3);
+}
+
+.exp-spy-snackbar.show.info {
+  background: linear-gradient(135deg, #2196F3, #1976D2);
+  color: white;
+  border-color: rgba(33, 150, 243, 0.3);
+}
+
+.exp-spy-snackbar.show.warning {
+  background: linear-gradient(135deg, #ff9800, #f57c00);
+  color: white;
+  border-color: rgba(255, 152, 0, 0.3);
+}
+
+.exp-spy-snackbar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.exp-spy-snackbar::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  vertical-align: middle;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.exp-spy-snackbar.show.success::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E");
+}
+
+.exp-spy-snackbar.show.error::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E");
+}
+
+.exp-spy-snackbar.show.info::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z'/%3E%3C/svg%3E");
+}
+
+.exp-spy-snackbar.show.warning::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z'/%3E%3C/svg%3E");
+}
+            `;
+
+            const existingStyle = document.querySelector('style[data-extension-css]');
+            if (!existingStyle) {
+                const style = document.createElement('style');
+                style.setAttribute('data-extension-css', 'true');
+                style.textContent = cssContent;
+                document.head.appendChild(style);
+                console.log('CSS injected successfully');
+            } else {
+                console.log('CSS already injected');
+            }
+        }
+
+        // Function expToast - chỉ thêm toast vào element có id
+        function expToast(type, msg) {
+            console.log('expToast called:', type, msg);
+
+            // Đảm bảo CSS đã được inject
+            injectCSS();
+
+            let x = document.getElementById("exp-spy-snackbar");
+
+            // Chỉ thêm toast nếu element đã tồn tại
+            if (x) {
+                x.innerText = msg;
+                x.className = "exp-spy-snackbar show " + type;
+                setTimeout(function () { x.className = "exp-spy-snackbar"; }, 3000);
+                console.log('Toast added to existing element');
+            } else {
+                console.error('Toast element not found. Please create element with id="exp-spy-snackbar"');
+            }
+        }
+
+        // Test functions
+        function testToastSuccess() {
+            console.log('Testing success toast');
+            expToast('success', 'Success message test');
+        }
+
+        function testToastError() {
+            console.log('Testing error toast');
+            expToast('error', 'Error message test');
+        }
+
+        function testToastInfo() {
+            console.log('Testing info toast');
+            expToast('info', 'Info message test');
+        }
+
+        function testToastWarning() {
+            console.log('Testing warning toast');
+            expToast('warning', 'Warning message test');
+        }
+
+        function checkToastElement() {
+            const element = document.getElementById('exp-spy-snackbar');
+            if (element) {
+                console.log('Toast element found:', element);
+                console.log('Classes:', element.className);
+                console.log('Computed styles:', window.getComputedStyle(element));
+            } else {
+                console.log('Toast element not found');
+            }
+        }
+
+        function createToastElement() {
+            const existingElement = document.getElementById('exp-spy-snackbar');
+            if (!existingElement) {
+                const element = document.createElement('div');
+                element.id = 'exp-spy-snackbar';
+                element.className = 'exp-spy-snackbar';
+                document.body.appendChild(element);
+                console.log('Toast element created with id="exp-spy-snackbar"');
+            } else {
+                console.log('Toast element already exists');
+            }
+        }
+
+        // Auto inject CSS khi page load
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('Page loaded, injecting CSS');
+            injectCSS();
+        });
+    </script>
+</body>
+
+</html>
