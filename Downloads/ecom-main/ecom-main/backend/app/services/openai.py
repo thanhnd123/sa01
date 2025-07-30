@@ -9,7 +9,7 @@
 
 # load_dotenv()
 
-# openai.api_key = "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"
+# openai.api_key = "YOUR_OPENAI_API_KEY_HERE"
 
 # def strip_code_block(gpt_result: str):
 #     return re.sub(r"^```json\n|```$", "", gpt_result.strip())
