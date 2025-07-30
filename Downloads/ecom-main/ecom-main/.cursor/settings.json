@@ -1,0 +1,9 @@
+{
+  "mcp.servers": {
+    "flask-tester": {
+      "command": "conda",
+      "args": ["run", "-n", "ecom", "python", "mcp-server/mcp_server.py"],
+      "cwd": "."
+    }
+  }
+} 

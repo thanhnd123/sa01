@@ -1,0 +1,15 @@
+name: ecom
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.12
+  - flask
+  - boto3
+  - humanize
+  - flask-bcrypt
+  - flask-jwt-extended
+  - flask-pymongo
+  - pytest
+  - python-dotenv
+  - pip

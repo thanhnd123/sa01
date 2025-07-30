@@ -1,0 +1,134 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Database Seeder Rules
+
+## Overview
+This document outlines the coding standards and patterns for creating database seeders in the Flask application.
+
+## General Structure
+
+### Seeder Function Definition
+```python
+def entity_name():
+    # Import dependencies
+    
+    def seed_entity():
+        # Seeding logic
+    
+    return seed_entity()
+```
+
+## Coding Standards
+
+### 1. Basic Setup
+- Import necessary modules at the top of the file
+- Use Flask-Bcrypt for password hashing when seeding user data
+- Format dates using `datetime.now().strftime("%Y-%m-%d %H:%M:%S")`
+
+### 2. Database Connection
+- Get database connection inside the seeder function
+- Access specific collections based on entity type
+```python
+db = connect_database()
+collection = db['collection_name']
+```
+
+### 3. Data Validation
+- Check if data already exists before seeding
+- Provide option to truncate existing data when appropriate
+```python
+if collection.count_documents({}) > 0:
+    print("Data already seeded")
+    # Option to truncate: truncate('collection_name')
+```
+
+### 4. Data Relationships
+- Retrieve related entity IDs for establishing relationships
+- Example: Get team ID to associate with users
+```python
+related_entity = db['related_collection'].find_one({
+    'query_field': 'query_value'
+})
+```
+
+### 5. Data Structure
+- Use list of dictionaries for bulk inserts
+- Include standard fields for all entities:
+  - `created_at` and `updated_at` timestamps
+  - Proper relationship IDs
+  - Required fields based on entity type
+
+### 6. Error Handling
+- Wrap database operations in try-except blocks
+- Print meaningful error messages
+- Return appropriate values on success/failure
+```python
+try:
+    result = collection.insert_many(data_list)
+    print(f"Successfully seeded {len(result.inserted_ids)} records")
+    return result.inserted_ids
+except Exception as e:
+    print(f"Error seeding data: {str(e)}")
+    return None
+```
+
+### 7. Security Practices
+- Never hardcode production passwords in seeders
+- Hash passwords using bcrypt for user data
+```python
+"password": bcrypt.generate_password_hash("password").decode('utf-8'),
+```
+### 8. Documentation
+- Include comments describing the purpose of the seeder
+- Document any special relationships or constraints
+
+## Example Seeder
+```python
+def users():
+    from database.connect_database import connect_database
+
+    def seed_users():
+        db = connect_database()
+        users_collection = db['users']
+        
+        # Check if users already exist
+        if users_collection.count_documents({}) > 0:
+            print("Users already seeded")
+            # Uncomment to clear existing data: truncate('users')
+        
+        # Get related team data
+        team = db['teams'].find_one({'name': 'Team Name'})
+        
+        # Prepare user data
+        users = [
+            {
+                "email": "user@example.com",
+                "password": bcrypt.generate_password_hash("securepass").decode('utf-8'),
+                "username": "Username",
+                "role": "user",
+                "team_id": team['_id'],
+                "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+        ]
+        
+        # Insert data with error handling
+        try:
+            result = users_collection.insert_many(users)
+            print(f"Successfully seeded {len(result.inserted_ids)} users")
+            return result.inserted_ids
+        except Exception as e:
+            print(f"Error seeding users: {str(e)}")
+            return None
+
+    return seed_users()
+```
+
+### 9. Run seeder
+- run in docker 
+- access to docker dc exec backend /bin/bash
+
+- then python run_seeder.py

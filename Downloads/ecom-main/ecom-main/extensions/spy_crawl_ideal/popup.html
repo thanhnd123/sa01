@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="/icons/logo.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ecom Crawler</title>
+    <!-- HTML in your document's head -->
+    <link rel="preconnect" href="https://rsms.me/" />
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+  </head>
+  <body>
+    <div id="app">
+      <h2 style="font-weight: bold; color: #4F46E5; text-align: center; margin-bottom: 1rem;">ECOMSYTEM CRAWL</h6>
+      <div class="login-container" style="display: flex; justify-content: center; align-items: center; height: 100%; padding-bottom: 4px;">
+        <p style="margin-bottom: 4px; color: #000000; text-align: center; margin-bottom: 1rem;">Bạn chưa đăng nhập. Click nút đăng nhập để bắt đầu</p>
+        <button id="login-button" class="login-btn" style="width: 100%; display: flex; justify-content: center; align-items: center;">
+          Login
+        </button>
+      </div>
+      <div class="welcome-message" style="padding-bottom: 10px;"></div>
+    </div>
+    
+    <style>
+      #app {
+        width: 300px;
+        height: 100px;
+        padding: 5px;
+      }
+      .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+      }
+
+      .login-btn {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        background-color: #4F46E5;
+        color: white;
+        border: none;
+        border-radius: 0.375rem;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .login-btn:hover {
+        background-color: #4338CA;
+      }
+    </style>
+    <script src="./assets/popup.js" type="module"></script>
+  </body>
+</html>

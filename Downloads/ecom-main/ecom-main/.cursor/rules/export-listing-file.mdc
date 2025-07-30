@@ -1,0 +1,256 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Amazon Export Listing File Flow (Updated)
+
+## Input Parameters
+- `shop_id`: ID của shop
+- `template_id`: ID của template Amazon
+- `listing_ids`: Danh sách ID các listing cần export
+
+## Flow Diagram
+
+```
+[Start] → [Validate Input] → [Get Template] → [Process Template Headers] → [Clear Existing Data] → [Get Listings] → [Fill Data] → [Generate File] → [Return URL]
+```
+
+## Detailed Process Flow
+
+### 1. Input Validation
+```
+Input: shop_id, template_id, listing_ids
+↓
+Validate:
+- shop_id exists and user has permission
+- template_id exists and belongs to Amazon platform
+- listing_ids are valid and belong to shop_id
+↓
+If validation fails → Return error
+If validation passes → Continue
+```
+
+### 2. Get Template Data
+```
+Query template by template_id
+↓
+Extract:
+- Template file path/URL (file mẫu)
+- Template structure with Amazon-specific headers
+↓
+Load template file into memory
+```
+
+### 3. Process Template Headers Structure
+```
+Analyze Amazon template file:
+↓
+Identify header structure:
+- Row 1: Primary headers (Product Info, Pricing, etc.)
+- Row 2: Sub-headers (Title, Description, Price, Currency, etc.)  
+- Row 3: Field codes/Variables ({product_title}, {price}, etc.)
+- Row 4+: Data rows (will be cleared and refilled)
+↓
+Map column relationships:
+  Column A: Row 1="Product Info" | Row 2="Title" | Row 3="{product_title}"
+  Column B: Row 1="Product Info" | Row 2="Description" | Row 3="{description}"
+  Column C: Row 1="Pricing" | Row 2="Price" | Row 3="{price}"
+  Column D: Row 1="Pricing" | Row 2="Currency" | Row 3="{currency}"
+  ...
+```
+
+### 4. Clear Existing Data
+```
+Process template file:
+↓
+Preserve header rows (1-3):
+- Keep Row 1: Primary category headers
+- Keep Row 2: Field name headers  
+- Keep Row 3: Variable pattern headers
+↓
+Clear data rows (4+):
+- Delete all existing data from row 4 onwards
+- Maintain column formatting and structure
+- Reset to clean template state
+↓
+Template now ready for new listing data
+```
+
+### 5. Get Listings Data
+```
+Query listings by listing_ids
+↓
+For each listing, get:
+- Basic info (title, description, price, currency)
+- Product attributes (brand, category, weight, dimensions)
+- Images URLs
+- Variants/SKUs with their specific data
+- Amazon-specific fields (ASIN, category nodes, etc.)
+- All fields that match Row 3 variable patterns
+↓
+Structure data according to template column mapping
+```
+
+### 6. Fill Listing Data into Template
+```
+Starting from Row 4 (first data row):
+↓
+For each listing in listing_ids:
+  ↓
+  For each column in template:
+    ↓
+    Get variable pattern from Row 3:
+    - Extract variable name (e.g., {product_title})
+    - Match with listing data field
+    - Apply Amazon-specific formatting rules
+    ↓
+    Fill processed value into current row, current column
+  ↓
+  Move to next row (Row 5, 6, 7...)
+↓
+Repeat until all listings processed
+```
+
+### 7. Amazon-Specific Variable Processing
+```
+For each cell value containing Amazon variables:
+↓
+Common Amazon Variables:
+- {product_title} → listing.title (max 150 chars for Amazon)
+- {description} → listing.description (HTML stripped, max 2000 chars)
+- {price} → listing.price (format: "19.99")
+- {currency} → listing.currency (default "USD")
+- {main_image} → listing.images[0].url
+- {swatch_image} → listing.images[1].url
+- {brand} → listing.brand
+- {manufacturer} → listing.manufacturer
+- {category} → Amazon category browse node
+- {sku} → listing.sku
+- {asin} → listing.asin (if exists)
+- {upc} → listing.upc/barcode
+- {weight} → listing.weight + unit
+- {dimensions} → listing.length x width x height
+↓
+Apply Amazon formatting rules:
+- Price: Remove currency symbols, use decimal format
+- Images: Validate URL format and accessibility
+- Text fields: Strip HTML, handle special characters
+- Category: Map to Amazon browse node IDs
+↓
+Handle missing/invalid data:
+- Required fields missing → Show validation error
+- Optional fields missing → Use empty string or default
+- Invalid format → Apply correction or flag for review
+```
+
+### 8. Template Structure Example
+
+| Column A | Column B | Column C | Column D | Column E |
+|----------|----------|----------|----------|----------|
+| **Product Info** | **Product Info** | **Pricing** | **Pricing** | **Images** |
+| Title | Description | Price | Currency | Main Image |
+| {product_title} | {description} | {price} | {currency} | {main_image} |
+| iPhone 15 Pro Max | Latest iPhone with... | 1199.00 | USD | https://images.com/iphone.jpg |
+| Samsung Galaxy S24 | Premium Android... | 999.99 | USD | https://images.com/samsung.jpg |
+
+### 9. File Generation & Validation
+```
+Template with filled listing data
+↓
+Validate Amazon requirements:
+- Check required fields are populated
+- Validate field lengths and formats
+- Verify image URLs are accessible
+- Check category mappings are valid
+↓
+Generate Excel file:
+- Maintain 3-row header structure
+- Preserve column formatting
+- Keep Amazon-compatible cell formats
+- Save as .xlsx format
+↓
+Store file temporarily with metadata:
+- Original template_id reference
+- Number of listings processed
+- Validation warnings/errors
+- Generated timestamp
+```
+
+### 10. Return Download Response
+```
+Generated file
+↓
+Create secure download URL with Amazon context:
+↓
+Return response:
+{
+  "success": true,
+  "data": {
+    "file_url": "https://storage.domain.com/exports/amazon_export_12345.xlsx",
+    "filename": "amazon_listings_export_20231123_143022.xlsx", 
+    "file_size": "3.2 MB",
+    "total_records": 150,
+    "template_used": "Amazon Standard Template v2.1",
+    "expires_at": "2023-11-24T14:30:22Z",
+    "validation_summary": {
+      "errors": 0,
+      "warnings": 3,
+      "ready_for_upload": true
+    }
+  },
+  "message": "Amazon export file đã được tạo thành công"
+}
+```
+
+## Enhanced Error Handling
+
+### Template Structure Errors
+- Missing 3-row header → "Template không đúng format Amazon (thiếu header 3 dòng)"
+- Invalid variable patterns in Row 3 → "Row 3 chứa biến không hợp lệ: {invalid_var}"
+- Mismatched column structure → "Cấu trúc cột không khớp với template Amazon"
+
+### Amazon Validation Errors
+- Required Amazon fields missing → "Thiếu thông tin bắt buộc cho Amazon: [field_list]"
+- Invalid category mapping → "Category không tồn tại trên Amazon"
+- Image URL not accessible → "Không thể truy cập hình ảnh: [url]"
+- Price format invalid → "Format giá không hợp lệ cho Amazon"
+
+### Data Processing Errors  
+- Too many listings → "Vượt quá giới hạn 1000 listings cho 1 lần export"
+- Listing data incomplete → "Listing [id] thiếu dữ liệu cần thiết"
+- Character encoding issues → "Dữ liệu chứa ký tự không hỗ trợ"
+
+## Performance Optimizations
+
+### Template Caching
+```
+Cache parsed template structure:
+- Headers mapping (1 hour cache)
+- Variable patterns (1 hour cache)  
+- Column formatting rules (1 hour cache)
+```
+
+### Batch Processing for Large Exports
+```
+If listing_ids > 500:
+  Split into batches of 100
+  Process each batch sequentially
+  Show progress: "Đang xử lý batch 3/15..."
+  Combine results into single file
+```
+
+### Amazon API Integration
+```
+For listings missing Amazon data:
+  Query Amazon API for:
+  - Valid category browse nodes
+  - ASIN information
+  - Current pricing data
+  Cache results for 24 hours
+```
+## Success Metrics
+- File generation time: < 30 seconds for 100 listings
+- Amazon validation pass rate: > 95%
+- Template compatibility: Support Amazon Standard Templates v2.0+
+- Error recovery: Auto-retry failed API calls up to 3 times

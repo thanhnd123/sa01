@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExtensionList>
+    <Extension Id="com.pts.ecomsys.ecom1" Version="1.0.0">
+        <HostList>
+            <Host Name="PHSP" Port="9090" />
+            <Host Name="PHXS" Port="9090" />
+        </HostList>
+    </Extension>
+</ExtensionList> 

@@ -1,0 +1,195 @@
+// Third-party Imports
+import CredentialProvider from 'next-auth/providers/credentials'
+import GoogleProvider from 'next-auth/providers/google'
+// import { PrismaAdapter } from '@auth/prisma-adapter'
+// import { PrismaClient } from '@prisma/client'
+import type { NextAuthOptions, User } from 'next-auth'
+import type { Adapter } from 'next-auth/adapters'
+import axios from 'axios'
+
+// const prisma = new PrismaClient()
+
+// Define custom user type
+interface CustomUser extends User {
+  role?: string
+  accessToken?: string
+  refreshToken?: string
+  team_id?: string
+  team_name?: string
+  teams?: Array<{ _id: string; name: string }>
+  token_user?: string
+}
+
+// Extend next-auth types
+declare module "next-auth" {
+  interface Session {
+    user: CustomUser
+  }
+}
+
+export const authOptions: NextAuthOptions = {
+  // adapter: PrismaAdapter(prisma) as Adapter,
+  pages: {
+    signIn: '/login',
+    // Các trang khác...
+  },
+
+  // ** Configure one or more authentication providers
+  // ** Please refer to https://next-auth.js.org/configuration/options#providers for more `providers` options
+  providers: [
+    CredentialProvider({
+      // ** The name to display on the sign in form (e.g. 'Sign in with...')
+      // ** For more details on Credentials Provider, visit https://next-auth.js.org/providers/credentials
+      name: 'Credentials',
+      type: 'credentials',
+
+      /*
+       * As we are using our own Sign-in page, we do not need to change
+       * username or password attributes manually in following credentials object.
+       */
+      credentials: {},
+      async authorize(credentials): Promise<User | null> {
+        // console.log('=== AUTH DEBUG ===')
+        // console.log('Authorize function called')
+        // console.log('Credentials received:', JSON.stringify(credentials, null, 2))
+        // console.log('API URL:', process.env.NEXT_PUBLIC_API_URL)
+        const { email, password } = credentials as { email: string; password: string }
+
+        try {
+          // console.log('Attempting login with:', { email })
+
+          // Kiểm tra và log URL API
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL
+          const res = await axios.post(`${apiUrl}/api/auth/login`, { email, password }, {
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            // timeout: 5000 // Thêm timeout 5 giây
+          })
+
+          const data = res.data
+          console.log('Server response:', data)
+
+          // Kiểm tra dữ liệu trả về
+          if (!data || !data.id || !data.email) {
+            console.error('Invalid user data:', data)
+            throw new Error('Invalid user data received from server')
+          }
+
+          // Tạo user object với các trường bắt buộc
+          const user: CustomUser = {
+            id: data.id.toString(), // Đảm bảo id là string
+            email: data.email,
+            name: data.name || data.email.split('@')[0], // Fallback name nếu không có
+            role: data.role || 'user', // Fallback role nếu không có
+            accessToken: data.access_token,
+            refreshToken: data.refresh_token,
+            team_id: data.team_id,
+            team_name: data.team_name,
+            teams: data.teams ? data.teams.map((team: any) => ({ _id: team._id, name: team.name })) : undefined,
+            token_user: data.token_user || "",
+          }
+          return user
+        } catch (e: any) {
+          if (e.response?.status === 401) {
+            throw new Error('Invalid credentials')
+          } else if (e.response?.status === 500) {
+            throw new Error('Server error occurred')
+          }
+          else if (e.response?.status === 402) {
+            throw new Error(e.response?.data?.error || 'User is not active. Please contact administrator.')
+          }
+          else {
+            throw new Error(e.response?.data?.message || e.message || 'Authentication failed')
+          }
+        }
+      }
+    }),
+
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string
+    })
+
+    // ** ...add more providers here
+  ],
+
+  // ** Please refer to https://next-auth.js.org/configuration/options#session for more `session` options
+  session: {
+    strategy: 'jwt',
+
+    maxAge: 30 * 24 * 60 * 60 // ** 30 days
+  },
+
+  // ** Please refer to https://next-auth.js.org/configuration/options#pages for more `pages` options
+  // pages: {
+  //   signIn: '/login'
+  // },
+
+  // ** Please refer to https://next-auth.js.org/configuration/options#callbacks for more `callbacks` options
+  callbacks: {
+    /*
+     * While using `jwt` as a strategy, `jwt()` callback will be called before
+     * the `session()` callback. So we have to add custom parameters in `token`
+     * via `jwt()` callback to make them accessible in the `session()` callback
+     */
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id
+        token.email = user.email
+        token.name = user.name
+        token.role = (user as CustomUser).role
+        token.accessToken = (user as CustomUser).accessToken
+        token.refreshToken = (user as CustomUser).refreshToken
+        token.team_id = (user as CustomUser).team_id
+        token.teams = (user as CustomUser).teams
+        token.team_name = (user as CustomUser).team_name
+        token.token_user = (user as CustomUser).token_user
+      }
+      return token
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        // ** Add custom params to user in session which are added in `jwt()` callback via `token` parameter
+        session.user.id = token.id as string
+        session.user.email = token.email as string
+        session.user.name = token.name as string
+        session.user.role = token.role as string
+        session.user.accessToken = token.accessToken as string
+        session.user.refreshToken = token.refreshToken as string
+        session.user.team_id = token.team_id as string
+        session.user.teams = (token.teams as { _id: string; name: string }[]) || undefined
+        session.user.team_name = token.team_name as string
+        session.user.token_user = token.token_user as string
+      }
+      return session
+    }
+  }
+}
+
+export async function refreshToken(refreshToken: string): Promise<string | null> {
+  try {
+    if (!refreshToken) return null
+
+    const res = await axios.post(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/auth/refresh`,
+      {},
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${refreshToken}`
+        }
+      }
+    )
+
+    const { access_token } = res.data
+    if (access_token) {
+      localStorage.setItem('accessToken', access_token)
+      return access_token
+    }
+    return null
+  } catch (error) {
+    // Có thể log hoặc xử lý lỗi ở đây
+    return null
+  }
+}

@@ -1,0 +1,222 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Amazon Listing Template Flow
+
+## Template Creation Flow
+1. User enters basic template information:
+   - Name (required)
+   - Description
+   - Market (default: amazon)
+   - Status (active/inactive)
+
+2. For Amazon market:
+   - User uploads template file (XLSX, XLS, CSV)
+   - File must have sheet named "Template"
+   - First column in row 3 must be "feed_product_type"
+   - Row 4 contains default values for columns
+
+3. Template Columns Display:
+   - Shows all columns from uploaded file
+   - Each column has:
+     - Index
+     - Column Name
+     - Description
+     - Default Value (Select dropdown with custom text input)
+
+4. Default Value Options:
+   - Select from predefined options:
+     - product_title
+     - description
+     - short_description
+     - main_image
+     - image_1
+     - image_2
+     - image_3
+     - image_4
+     - image_5
+     - image_6
+     - image_7
+     - image_8
+     - image_9
+     - image_10
+     - bullet_
+   - Or enter custom text value
+
+5. File Upload Process:
+   - Shows progress bar during upload
+   - Validates file format and content
+   - Displays success/error messages
+   - Updates template columns table
+
+6. Template Creation:
+   - Validates required fields
+   - Sends template data to API
+   - Handles success/error responses
+
+
+   - Closes form on success)
+
+# Listing Template Rules
+
+## 7. Form Thêm/Sửa Template
+
+### 7.1 Thông tin chung
+- Form được chia làm 2 phần chính:
+  - Thông tin cơ bản (bên trái)
+  - Cấu hình nâng cao (bên phải)
+- Responsive: 2 cột trên desktop, 1 cột trên mobile
+
+### 7.2 Thông tin cơ bản
+#### 7.2.1 Tên template (Name)
+- Bắt buộc nhập
+- Text field đơn dòng
+- Label hiển thị "Name"
+- Validation: Không được để trống
+
+#### 7.2.2 Mô tả (Description)
+- Tùy chọn
+- Text field đa dòng (4 dòng)
+- Label hiển thị "Description"
+- Có thể nhập nhiều dòng
+
+### 7.3 Cấu hình nâng cao
+#### 7.3.1 Loại sản phẩm (Product Type)
+- Chỉ hiển thị khi platform là Amazon
+- Autocomplete field
+- Load dữ liệu từ API `/products/product-types`
+- Hiển thị loading indicator khi đang tải
+- Validation: Bắt buộc chọn
+
+#### 7.3.2 Nền tảng (Platform)
+- Select field
+- Các lựa chọn:
+  - Amazon
+  - TikTok
+  - Etsy
+  - eBay
+- Mặc định: Amazon
+
+#### 7.3.3 Loại listing (Listing Type)
+- Select field
+- Các lựa chọn:
+  - Single Product
+  - Variant Product
+  - Grouped Product
+- Mặc định: Single Product
+
+#### 7.3.4 Trạng thái (Status)
+- Select field
+- Các lựa chọn:
+  - Active
+  - Inactive
+- Mặc định: Active
+
+### 7.4 Xử lý file template (chỉ cho Amazon)
+#### 7.4.1 Upload file
+- Button "Upload Template File"
+- Hỗ trợ định dạng: XLSX, XLS, CSV
+- Hiển thị loading khi đang xử lý
+- Reset file input sau mỗi lần upload
+
+#### 7.4.2 Hiển thị cột
+- Bảng hiển thị các cột từ file template
+- Virtualized table để tối ưu hiệu năng
+- Các cột hiển thị:
+  - Index
+  - Column Name
+  - Default Value
+
+#### 7.4.3 Tìm kiếm cột
+- Debounced input
+- Tìm kiếm theo tên cột
+- Hiển thị số lượng kết quả
+- Cập nhật realtime
+
+### 7.5 Xử lý giá trị mặc định
+#### 7.5.1 DefaultValueSelect Component
+- Autocomplete field
+- Hỗ trợ nhập tự do
+- Các giá trị mặc định:
+  - {product_title}
+  - {description}
+  - {short_description}
+  - {main_image}
+  - {sku}
+  - {bullet_point_1} đến {bullet_point_5}
+  - {image_1} đến {image_10}
+
+#### 7.5.2 Xử lý giá trị
+- Tự động format giá trị trong dấu ngoặc nhọn
+- Lưu giá trị gốc (không có dấu ngoặc)
+- Cập nhật realtime khi thay đổi
+
+### 7.6 Xử lý form
+#### 7.6.1 Validation
+- Kiểm tra các trường bắt buộc
+- Validate file template
+- Kiểm tra cấu trúc dữ liệu
+- Hiển thị thông báo lỗi
+
+#### 7.6.2 Submit form
+- Tạo FormData
+- Thêm các trường thông tin
+- Thêm file template (nếu có)
+- Gọi API tương ứng:
+  - POST cho thêm mới
+  - PUT cho cập nhật
+
+#### 7.6.3 Xử lý response
+- Hiển thị thông báo thành công/thất bại
+- Reset form sau khi thành công
+- Đóng form và cập nhật danh sách
+
+### 7.7 Tối ưu hiệu năng
+#### 7.7.1 Memoization
+- Sử dụng useMemo cho các giá trị tính toán
+- Sử dụng useCallback cho các hàm xử lý
+- Tối ưu re-render với React.memo
+
+#### 7.7.2 Virtualization
+- Sử dụng react-window cho danh sách dài
+- Tối ưu hiệu năng render
+- Hỗ trợ scroll mượt mà
+
+### 7.8 Xử lý lỗi
+#### 7.8.1 Validation errors
+- Hiển thị thông báo lỗi
+- Highlight trường lỗi
+- Hướng dẫn sửa lỗi
+
+#### 7.8.2 API errors
+- Hiển thị toast message
+- Log lỗi chi tiết
+- Cho phép thử lại
+
+### 7.9 State Management
+#### 7.9.1 Local state
+- Quản lý form data
+- Quản lý file upload
+- Quản lý loading state
+
+#### 7.9.2 Props
+- onClose: Đóng form
+- onSuccess: Callback khi thành công
+- editData: Dữ liệu cần sửa (cho EditForm)
+
+### 7.10 Responsive Design
+#### 7.10.1 Layout
+- Grid system
+- Spacing hợp lý
+- Breakpoints:
+  - xs: 1 cột
+  - md: 2 cột
+
+#### 7.10.2 Components
+- Responsive table
+- Scrollable containers
+
+
+- Flexible inputs

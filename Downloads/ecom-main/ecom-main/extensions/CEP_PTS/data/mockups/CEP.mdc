@@ -1,0 +1,203 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# 🎨 Thiết Kế CEP Extension Cho Photoshop Chạy Script
+
+Extension này tạo một panel trong Photoshop.
+
+---
+
+## 📁 Cấu Trúc Thư Mục
+
+```
+MyCEP/
+├── CSXS/
+│   └── manifest.xml
+├── index.html
+├── js/
+│   └── main.js
+├── css/
+│   └── style.css
+├── jsx/
+│   └── hostScript.jsx
+└── CSInterface.js
+```
+
+---
+
+## 📝 `CSXS/manifest.xml`
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<ExtensionManifest Version="7.0" ExtensionBundleId="com.example.mycep" ExtensionBundleVersion="1.0.0" xmlns="http://www.adobe.com/ExtensionManifest/7.0">
+  <ExtensionList>
+    <Extension Id="com.example.mycep.panel"/>
+  </ExtensionList>
+  <ExecutionEnvironment>
+    <HostList>
+      <Host Name="PHXS" Version="[0.0,99.0]"/>
+    </HostList>
+    <LocaleList>
+      <Locale Code="All"/>
+    </LocaleList>
+    <RequiredRuntimeList>
+      <RequiredRuntime Name="CSXS" Version="6.0"/>
+    </RequiredRuntimeList>
+  </ExecutionEnvironment>
+  <DispatchInfoList>
+    <Extension Id="com.example.mycep.panel">
+      <DispatchInfo>
+        <Resources>
+          <MainPath>index.html</MainPath>
+          <ScriptPath>js/main.js</ScriptPath>
+        </Resources>
+        <Lifecycle>
+          <AutoVisible>true</AutoVisible>
+        </Lifecycle>
+        <UI>
+          <Type>Panel</Type>
+          <Menu>My CEP Panel</Menu>
+          <Geometry>
+            <Size>
+              <Width>300</Width>
+              <Height>200</Height>
+            </Size>
+          </Geometry>
+        </UI>
+      </DispatchInfo>
+    </Extension>
+  </DispatchInfoList>
+</ExtensionManifest>
+```
+
+---
+
+## 🌐 `index.html`
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>CEP Panel</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script type="text/javascript" src="CSInterface.js"></script>
+  <script type="text/javascript" src="js/main.js"></script>
+</head>
+<body>
+  <h1>My CEP Panel</h1>
+  <button id="btnHello">Say Hello</button>
+</body>
+</html>
+```
+
+---
+
+## 🎨 `css/style.css`
+
+```css
+body {
+  background: #222;
+  color: white;
+  font-family: sans-serif;
+  padding: 20px;
+}
+
+button {
+  background-color: #0088ff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+}
+```
+
+---
+
+## ⚙️ `js/main.js`
+
+```js
+(function () {
+  const csInterface = new CSInterface();
+
+  document.getElementById('btnHello').addEventListener('click', () => {
+    csInterface.evalScript('sayHello()');
+  });
+})();
+```
+
+---
+
+## ✍️ `jsx/hostScript.jsx`
+
+```jsx
+function sayHello() {
+  alert("Hello from CEP!");
+}
+```
+
+---
+
+## 🧠 `CSInterface.js`
+
+Tải từ Adobe CEP Resources:
+
+🔗 https://github.com/Adobe-CEP/CEP-Resources/tree/master/CEP_9.x/CSInterface.js
+
+---
+
+## 🖥️ Cài Đặt Extension
+
+### Bước 1: Copy vào thư mục extension
+
+- **macOS**:  
+  `~/Library/Application Support/Adobe/CEP/extensions/MyCEP`
+
+- **Windows**:  
+  `C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\MyCEP`
+
+---
+
+### Bước 2: Cho phép extension chưa ký
+
+- **macOS:**
+```bash
+defaults write com.adobe.CSXS.9 PlayerDebugMode 1
+```
+
+- **Windows (Registry):**
+```
+[HKEY_CURRENT_USER\Software\Adobe\CSXS.9]
+"PlayerDebugMode"=dword:00000001
+```
+
+---
+
+### Bước 3: Mở trong Photoshop
+
+Vào menu:
+```
+Window → Extensions (Legacy) → My CEP Panel
+```
+
+---
+
+## ✅ Kết Quả
+
+Khi bạn nhấn nút `Say Hello` trong panel, một hộp thoại sẽ hiển thị:
+
+> `Hello from CEP!`
+
+---
+
+## 🧩 Gợi Ý Mở Rộng
+
+- Giao tiếp với phần mềm bên ngoài qua WebSocket.
+- Tích hợp export ảnh, upload API, rename layer, đọc metadata...
+- Chạy nhiều ExtendScript để điều khiển Photoshop từ app khác.
+
+---
+

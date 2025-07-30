@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>CEP Panel</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <!-- Load CSInterface first -->
+    <script type="text/javascript" src="../js/CSInterface.js"></script>
+    <!-- Add error handling for CSInterface -->
+    <script type="text/javascript">
+        if (typeof CSInterface === 'undefined') {
+            console.error('CSInterface.js failed to load. Please check the file path.');
+        }
+    </script>
+    <!-- Load main application code -->
+    <script type="text/javascript" src="https://sdk.amazonaws.com/js/aws-sdk-2.1613.0.min.js"></script>
+    <script type="text/javascript" src="../js/main.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>ECOM.SYSTEMA</h1>
+        <div class="content">
+            <button id="btnHello">Get Action</button>
+            <div id="result"></div>
+        </div>
+    </div>
+</body>
+</html> 

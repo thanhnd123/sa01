@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>eBay Account</title>
+	<!-- <link rel="stylesheet" type="text/css" href="../css/popup.css"> -->
+	<link rel="stylesheet" href="../css/bootstrap.min.css">
+</head>
+
+<body>
+	<div style="width: 250px;">
+		<section class="p-3">
+			<form id="exp-form-submit-user">
+				<div class="">
+					<!-- <input id="host" type="text" name="host" value="" placeholder="Host: banhoang.tokamedia.com" required autocomplete="new-password"> -->
+					<select class="form-control" name="hosts"
+						id="host" value="" placeholder="Host: banhoang.tokamedia.com" required
+						autocomplete="new-password">
+						<option value="https://apiecom.teamexp.net/" selected>Ecom System</option>
+						<!-- <option value="work-space.teamexp.net">Datacenter</option> -->
+						<!-- <option value="banhoang.tokamedia.com">BanHoang</option> -->
+					</select>
+				</div>
+				<div class="mt-2">
+					<input class="form-control" id="token" type="text" name="token" value="" placeholder="User token" required
+						autocomplete="token">
+				</div>
+				<div class="mt-2 row">
+					<div class="col-3">
+						<button class="btn btn-primary btn-sm" id="submit" type="submit">Submit</button>
+					</div>
+					<div class="col-9"></div>
+				</div>
+				<small class="mt-3" id="exp-small-result-message"></small>
+				<hr>
+			</form>
+		</section>
+	</div>
+	<!-- <script src="../js/bootstrap.min.js"></script> -->
+	<script src="../js/popup.js"></script>
+</body>
+
+</html>

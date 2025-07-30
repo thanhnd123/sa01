@@ -1,0 +1,82 @@
+{
+    "General Gift": [
+        "Gift",
+        "Perfect Gift",
+        "Great for Gifts",
+        "Gift Idea",
+        "Gift Box",
+        "Gift Set",
+        "Luxury Gift",
+        "Personalized Gift",
+        "Thoughtful Gift",
+        "Unique Gift",
+        "Surprise Gift",
+        "Best Gift",
+        "Memorable Gift"
+    ],
+    "Birthday Gift": [
+        "Birthday Gift",
+        "Perfect Birthday Gift",
+        "Funny Birthday Gift",
+        "Birthday Surprise",
+        "Birthday Present",
+        "Birthday Gift for Him",
+        "Birthday Gift for Her",
+        "Birthday Keepsake"
+    ],
+    "Holiday Gift": [
+        "Christmas Gift",
+        "Xmas Gift",
+        "Holiday Gift",
+        "New Year Gift",
+        "Stocking Stuffer",
+        "Secret Santa Gift",
+        "Festive Gift"
+    ],
+    "Love & Romantic Gift": [
+        "Valentine\u2019s Day Gift",
+        "Romantic Gift",
+        "Love Gift",
+        "Anniversary Gift",
+        "Couple Gift",
+        "Engagement Gift",
+        "Wedding Gift",
+        "Honeymoon Gift"
+    ],
+    "Family Gift": [
+        "Mother's Day Gift",
+        "Father's Day Gift",
+        "Gift for Mom",
+        "Gift for Dad",
+        "Parents Gift",
+        "Gift for Son",
+        "Gift for Daughter",
+        "Family Gift",
+        "Grandparent Gift"
+    ],
+    "Home & Friends Gift": [
+        "Housewarming Gift",
+        "Gift for Home",
+        "Hostess Gift",
+        "Friendship Gift",
+        "Best Friend Gift",
+        "Colleague Gift",
+        "Thank You Gift"
+    ],
+    "Hobby Gift": [
+        "Fitness Gift",
+        "Cooking Gift",
+        "Music Lover Gift",
+        "Book Lover Gift",
+        "Gaming Gift",
+        "Pet Lover Gift",
+        "Outdoor Gift"
+    ],
+    "Special Occasion Gift": [
+        "Graduation Gift",
+        "Retirement Gift",
+        "Promotion Gift",
+        "Farewell Gift",
+        "New Baby Gift"
+    ]
+}

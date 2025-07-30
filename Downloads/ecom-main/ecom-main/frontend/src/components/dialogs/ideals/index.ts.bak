@@ -1,0 +1,80 @@
+export interface ProductTypes {
+  [key: string]: string
+}
+
+export interface Template {
+  product_type: string;
+  color: string;
+  size: string;
+  count: number;
+  template_link: string;
+  template_id?: string;
+  items: Array<{
+    color: string;
+    size: string;
+  }>;
+}
+
+export interface MockupSelect {
+  product_type: string;
+  mockup_id: string;
+  mockup_name: string;
+  mockup_file: string;
+  placeholder_png?: string;
+  placeholder_png_needs_processing?: boolean;
+}
+
+// For SyncIdealToDesignDialog
+export interface DataRequest {
+  product_ideal: string | any;
+  select_product_types: string[];
+  seller_note: string;
+  user_id: string;
+  templates: Template[];
+  mockup_selects: MockupSelect[];
+}
+
+// For BannerGenerateDialog
+export interface BannerGenerateRequest {
+  ideal_id: string;
+  ideal_banner: string;
+  name: string;
+  png: string;
+  created_by: string;
+  worker: string;
+  seller_note?: string;
+  products: {
+    title: string;
+    product_type: string;
+    banners: any[];
+    main_images: string;
+    status: string;
+    mockup_name: string;
+    placeholder_png?: string;
+  }[];
+}
+
+export interface DataDesign {
+  "_id": string;
+  "badgeText"?: string[];
+  "banner": string;
+  "comments"?: string[];
+  "created_at"?: string;
+  "design_links"?: string[];
+  "designer_id": string;
+  "mockup_renders"?: string[];
+  "product_ideal_id": string;
+  "seller_id": string;
+  "seller_note": string;
+  "status": number;
+  "title": string;
+  "updated_at"?: string;
+  'designer': string;
+  'seller': string;
+}
+
+export interface SelectMultipleProps {
+  productTypes: ProductTypes;
+  valueSelectModal: string[];
+  setValueSelectModal: (value: string[]) => void;
+} 

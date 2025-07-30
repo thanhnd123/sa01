@@ -1,0 +1,33 @@
+{
+    "users": [
+        {
+            "name": "Manager",
+            "email": "admin@gmail.com",
+            "password": "password",
+            "role_id": "680128d98e1768675e3a8145",
+            "team_id": "68012bc5d3fbd03d995ec88d",
+            "token_admin": "$2y$12$UqTmw4c437JJpWwsLBFBaOv4tKJoLTnpWZqcuzon5amDHLAk6RPim"
+        },
+        {
+            "name": "Seller",
+            "email": "seller@gmail.com",
+            "password": "password",
+            "role_id": "680128d98e1768675e3a8146",
+            "team_id": "68012bc5d3fbd03d995ec88d"
+        },
+        {
+            "name": "Designer",
+            "email": "designer@gmail.com",
+            "password": "password",
+            "role_id": "680128d98e1768675e3a8147",
+            "team_id": "68012bc5d3fbd03d995ec88d"
+        },
+        {
+            "name": "Fulfiller",
+            "email": "fulfiller@gmail.com",
+            "password": "password",
+            "role_id": "680128d98e1768675e3a8148",
+            "team_id": "68012bc5d3fbd03d995ec88d"
+        }
+    ]
+}

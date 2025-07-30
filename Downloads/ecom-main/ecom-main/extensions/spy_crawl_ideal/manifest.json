@@ -1,0 +1,91 @@
+{
+   "manifest_version": 3,
+   "name": "Ecom crawler",
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlWFbAgJ4LK/M+tWUslKcEf3dKgmMC1uHCGHM5ulhC7zGY4VrRmcy/NXLBZB3t3Gurhq+QYWi4EPpNw9XHl6iMlbCe4mdFbG69Qeym+lJ+pyRXSCt9p+tIZEdwvnwDxyAqWTZdUvlIVdjbYarrS8WHadhnFdSEzP5eBGWmfuumNzQcnWhR8ePj0CM4dPCU8aHLbnJ4b1py2fH/oAR/f1LOf/I/v4NjbOwLd/+XReac3Zt0raDJCbBO7RDvAfHn8jopf7OBMfmmxI7jUJjwEXLhg9GRioXaQs/qUydVgcQSpEJrz8hhJ+IZkFVdMie21/m5hJLRgGzQWo08LbwJ6LcpQIDAQAB",
+   "version": "1.0.3",
+   "permissions": [
+      "storage",
+      "tabs",
+      "scripting"
+   ],
+   "host_permissions": [
+      "http://localhost:3000/*",
+      "https://ecom.teamexp.net/*",
+      "*://www.etsy.com/*",
+      "*://etsy.com/*"
+   ],
+   "action": {
+      "default_icon": "assets/img/logo-48.png",
+      "default_popup": "popup.html"
+   },
+   "background": {
+      "service_worker": "service-worker-loader.js",
+      "type": "module"
+   },
+   "content_scripts": [
+      {
+         "js": [
+            "assets/content.js"
+         ],
+         "matches": [
+            "https://ecom.teamexp.net/*",
+            "http://localhost:3000/*"
+         ],
+         "run_at": "document_end"
+      },
+      {
+         "css": [
+            "assets/log.f5494b91.css",
+            "spyer/css/content-scripts.css"
+         ],
+         "js": [
+            "assets/content-script-loader.chunk-032ae0e5.b4e01fab.js",
+            "assets/content-script-loader.chunk-b674a675.a2f7dc82.js",
+            "spyer/js/helpers.js",
+            "spyer/js/initial.js",
+            "spyer/js/content_scripts.js",
+            "spyer/sites/etsy/index.js",
+            "spyer/sites/shopify.js"
+         ],
+         "matches": [
+            "<all_urls>"
+         ],
+         "run_at": "document_end"
+      }
+   ],
+   "description": "Ecom crawler",
+   "icons": {
+      "128": "assets/img/logo-128.png",
+      "256": "assets/img/logo-256.png",
+      "48": "assets/img/logo-48.png"
+   },
+   "web_accessible_resources": [
+      {
+         "matches": [
+            "*://www.etsy.com/*"
+         ],
+         "resources": [
+            "*"
+         ],
+         "use_dynamic_url": false
+      },
+      {
+         "matches": [
+            "*://www.etsy.com/*"
+         ],
+         "resources": [
+            "env.js",
+            "spyer/sites/etsy/inject.js",
+            "spyer/sites/etsy/index.js",
+            "assets/chunk-1fc6abaf.js",
+            "assets/chunk-52add7e1.js",
+            "assets/chunk-821333de.js",
+            "assets/chunk-863d424b.js",
+            "assets/chunk-032ae0e5.js",
+            "assets/chunk-b39c9655.js",
+            "assets/chunk-b674a675.js"
+         ],
+         "use_dynamic_url": false
+      }
+   ]
+}

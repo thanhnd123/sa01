@@ -1,0 +1,124 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Flask API Code Rules
+
+## Overview
+This document outlines the basic coding standards and patterns for Flask API endpoints. These rules can be applied across multiple route definitions.
+
+## General Structure
+
+### Blueprint Definition
+```python
+example_bp = Blueprint('resource_name', __name__)
+```
+
+### Route Definitions
+```python
+@example_bp.route('/path', methods=["GET"])
+def function_name():
+    # Implementation
+```
+
+## Authentication
+
+### 1. Route Authentication
+- Routes trong folder `authenticated` đã được bảo vệ bởi `login_required` decorator ở cấp blueprint
+- Không cần thêm `@login_required` cho từng route trong folder này
+- Các route ngoài folder `authenticated` cần thêm `@login_required` nếu yêu cầu xác thực
+
+### 2. User Context
+- Sử dụng `current_user` để truy cập thông tin người dùng đã đăng nhập
+- Kiểm tra quyền truy cập dựa trên `current_user.id`
+- Trả về lỗi 403 nếu người dùng không có quyền truy cập
+
+## Coding Standards
+
+### 1. Error Handling
+- Always wrap endpoint logic in try-except blocks
+- Return standardized error responses
+```python
+try:
+    # Logic here
+except Exception as exception:
+    return jsonify({
+        "error": f"Error message: {str(exception)}"
+    }), 500
+```
+
+### 2. Query Parameters
+- Extract and validate query parameters with default values
+```python
+limit = request.args.get('limit', default=50)
+page = request.args.get('page', default=1)
+search = request.args.get('search', '').strip()
+```
+
+### 3. Pagination Pattern
+- Standard pagination implementation:
+  - Calculate skip value: `skip = (int(page) - 1) * int(limit)`
+  - Get total count for pagination info
+  - Return standardized response format:
+```json
+{
+  "data": [],
+  "total": 0,
+  "page": 1,
+  "limit": 50,
+  "total_pages": 0
+}
+```
+
+### 4. Database Operations
+- Use helper functions for common operations:
+  - `find()` - Find single record
+  - `create()` - Create new record
+  - `update()` - Update existing record
+  - `delete()` - Delete record
+  - `all()` - Get all records
+  - `paginate()` - Get paginated results
+
+### 5. User Authentication
+- Use JWT for authentication
+- Extract user identity with `get_jwt_identity()`
+- Filter results based on user context when appropriate
+
+### 6. Data Formatting
+- Always convert MongoDB ObjectIDs to strings before returning
+- Return consistent JSON structures across endpoints
+- Use `jsonify()` for all responses
+
+### 7. HTTP Methods
+- Use appropriate HTTP methods:
+  - GET for retrieving data
+  - POST for creating resources
+  - PUT/PATCH for updating resources
+  - DELETE for removing resources
+
+## Example Usage
+```python
+@example_bp.route('/resources/list', methods=["GET"])
+def list_resources():
+    try:
+        # Extract query parameters
+        limit = request.args.get('limit', default=50)
+        page = request.args.get('page', default=1)
+        search = request.args.get('search', '').strip()
+        
+        # Build query
+        query = None
+        if search:
+            query = {
+                "query": "title",
+                "value": search.lower()
+            }
+            
+        # Get paginated results
+        result = paginate('resource_table', page=page, limit=limit, query=query)
+        return jsonify(result)
+    except Exception as exception:
+        return jsonify({
+            "error": f"Error when retrieving data: {str(exception)}"
+        }), 500

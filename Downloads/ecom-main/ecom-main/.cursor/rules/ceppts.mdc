@@ -1,0 +1,152 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+
+# 🖥️ Thiết Kế Photoshop Client Cho Hệ Thống Server-Controlled API
+
+Hệ thống này giúp **Photoshop tự động chạy các lệnh/script do server gửi xuống**, phục vụ các mục đích như:
+
+- Tự động xử lý ảnh (crop, resize, export, v.v.).
+- Đồng bộ workflow từ backend.
+- Trigger hành động từ web/app vào Photoshop.
+
+---
+
+## 🧱 Kiến Trúc Hệ Thống
+
+```
+[Server API] ⇄ [CEP Extension trong Photoshop] ⇄ [ExtendScript]
+```
+
+- Server gửi JSON chứa lệnh/script hoặc URL script.
+- CEP Extension trong Photoshop liên tục lắng nghe (WebSocket hoặc polling).
+- CEP gọi `evalScript()` để chạy script trong môi trường Photoshop.
+
+---
+
+## 📁 Cấu Trúc Thư Mục CEP
+
+```
+PhotoshopClient/
+├── CSXS/
+│   └── manifest.xml
+├── index.html
+├── js/
+│   ├── main.js
+│   └── socket.js
+├── css/
+│   └── style.css
+├── jsx/
+│   └── dispatcher.jsx
+└── CSInterface.js
+```
+
+---
+
+## 📡 Giao Tiếp Với Server (Polling / WebSocket)
+
+### 1. WebSocket mẫu (socket.js)
+
+```js
+let socket = new WebSocket("wss://yourserver.com/photoshop");
+
+socket.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  if (data.type === "script" && data.code) {
+    new CSInterface().evalScript(data.code);
+  }
+};
+```
+
+### 2. Hoặc dùng polling
+
+```js
+setInterval(async () => {
+  const res = await fetch("https://yourserver.com/api/commands");
+  const { code } = await res.json();
+  if (code) {
+    new CSInterface().evalScript(code);
+  }
+}, 5000);
+```
+
+---
+
+## ✍️ JSX Script Dispatcher (dispatcher.jsx)
+
+```jsx
+// Mã script sẽ được truyền trực tiếp từ server vào evalScript
+// Ví dụ payload:
+// { "code": "app.activeDocument.resizeImage(UnitValue(800,'px'), null);" }
+```
+
+---
+
+## ⚙️ main.js
+
+```js
+(function () {
+  const cs = new CSInterface();
+  // Load socket or polling logic
+  loadJS("js/socket.js");
+})();
+```
+
+---
+
+## 🔒 Bảo Mật & Giới Hạn
+
+- Nên xác thực WebSocket bằng token khi kết nối.
+- Cẩn trọng với lệnh `evalScript(code)` – chỉ cho phép các script từ nguồn tin cậy.
+- Có thể whitelist function (ví dụ: chỉ cho phép `resizeImage`, `exportPNG`).
+
+---
+
+## 🛠️ Tích Hợp với Server
+
+Server backend sẽ cần:
+
+- Endpoint gửi script hoặc gửi theo WebSocket.
+- DB lưu log task đã gửi.
+- Token-based hoặc IP-restricted xác thực client CEP.
+
+---
+
+## 🧪 Ví Dụ Script
+
+```jsx
+// Resize ảnh về 800px chiều rộng
+app.activeDocument.resizeImage(UnitValue(800, "px"), null);
+
+// Xuất file PNG
+var opts = new PNGSaveOptions();
+app.activeDocument.saveAs(new File("/c/temp/output.png"), opts, true);
+```
+
+---
+
+## ✅ Ưu Điểm
+
+- Chủ động từ server, không cần thao tác người dùng.
+- Giao tiếp real-time (WebSocket).
+- Mở rộng dễ dàng cho hệ thống xử lý ảnh tự động.
+
+---
+
+## ⚠️ Lưu Ý
+
+- CEP chỉ chạy khi Photoshop mở.
+- Máy client cần bật 24/7 nếu muốn hoạt động liên tục.
+- Chỉ nên chạy script đã được kiểm duyệt/ký.
+
+---
+
+## 🔗 Tài Nguyên Tham Khảo
+
+- [Adobe CEP Resources](https://github.com/Adobe-CEP)
+- [CSInterface.js API](https://github.com/Adobe-CEP/CEP-Resources)
+- [Photoshop Scripting Guide](https://www.adobe.com/content/dam/acom/en/devnet/photoshop/pdfs/photoshop-cc-javascript-ref-2020.pdf)
+
+---
