@@ -47,6 +47,7 @@ services:
       - ./backend/data:/app/data:ro
     environment:
       - MONGO_URI=mongodb://mongodb:27017/exp_ecom_db
+      - MONGODB_URI=mongodb://mongodb:27017/exp_ecom_db
       - JWT_SECRET=your_jwt_secret
       - FLASK_ENV=development
       - PYTHONUNBUFFERED=1

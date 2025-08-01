@@ -23,7 +23,13 @@ def list():
 
     # Build filter
     if user['role'] == 'manager' or user['role'] == 'admin':
-        filter_query = {'team_id': user['team_id']}
+        # Admin/Manager can see all shops in their team
+        filter_query = {
+            '$or': [
+                {'team_id': user['team_id']},
+                {'seller_id': {'$in': [str(user['_id'])]}}  # Include shops where they are seller
+            ]
+        }
     else:
         filter_query = {'seller_id': user_id}
 

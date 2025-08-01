@@ -22,7 +22,7 @@ app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
 app.config.update(
     TESTING=os.environ.get('TESTING', False),
-    MONGO_URI=os.environ.get('MONGO_URI', 'mongodb://mongodb:27017/exp_ecom_db'),
+    MONGO_URI=os.environ.get('MONGO_URI'),
     JWT_SECRET_KEY=os.environ.get('JWT_SECRET_KEY', 'your-secret-key'),
     JWT_ACCESS_TOKEN_EXPIRES=timedelta(hours=1),
     JWT_REFRESH_TOKEN_EXPIRES=timedelta(days=30)

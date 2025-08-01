@@ -42,4 +42,4 @@ USER appuser
 EXPOSE 5000
 
 # Run the application with Gunicorn
-CMD ["/bin/bash", "-c", ". /opt/conda/etc/profile.d/conda.sh && conda activate ecom && gunicorn --bind 0.0.0.0:5000 --workers 1 --timeout 120 --reload --access-logfile - --error-logfile - --log-level debug wsgi:app"]
+CMD ["/bin/bash", "-c", ". /opt/conda/etc/profile.d/conda.sh && conda activate ecom && gunicorn --bind 0.0.0.0:5000 --workers 4 --timeout 120 --reload --access-logfile - --error-logfile - --log-level info wsgi:app"]

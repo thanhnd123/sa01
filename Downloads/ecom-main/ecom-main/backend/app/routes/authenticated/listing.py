@@ -324,6 +324,7 @@ def listListing():
         # Kết nối database
         db = connect_database()
         user_id = get_jwt_identity()
+        user = db.users.find_one({'_id': ObjectId(user_id)})
 
         # Xây dựng query
         query = {}
@@ -360,8 +361,15 @@ def listListing():
                     {'children_ids': {'$exists': False}}
                 ]
 
-        # Thêm điều kiện user_id
-        query['created_by'] = ObjectId(user_id)
+        # Thêm điều kiện user_id/team_id
+        if user['role'] == 'manager' or user['role'] == 'admin':
+            # Admin/Manager can see all listings in their team
+            query['$or'] = [
+                {'created_by': ObjectId(user_id)},
+                {'team_id': user['team_id']}
+            ]
+        else:
+            query['created_by'] = ObjectId(user_id)
 
         # Xây dựng sort
         sort = [(sort_field, -1 if sort_order == 'desc' else 1)]

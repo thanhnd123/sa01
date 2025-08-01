@@ -122,8 +122,8 @@ def create_design():
             "product_ideal_id": str(product_ideal_id),
             "seller_note": seller_note,
             "status": status,
-            "team_id": user.get("team_id"),
-            "order_by_user_id": user_id,
+            "team_id": str(user.get("team_id")) if user.get("team_id") else None,
+            "order_by_user_id": str(user_id),
             "created_at": design_data["created_at"],
             "updated_at": design_data["updated_at"],
             'banner': design_data['banner'],
@@ -350,7 +350,7 @@ def list_design_actions():
         user_id = get_jwt_identity()
         user = db.users.find_one({"_id": ObjectId(user_id)})
         if user and 'team_id' in user:
-            base_query_conditions.append({"team_id": str(user['team_id'])})
+            base_query_conditions.append({"team_id": user['team_id']})
         final_base_query = {}
         if base_query_conditions:
             if len(base_query_conditions) > 1:
@@ -465,8 +465,20 @@ def bulk_create_design_action():
         db = connect_database()
                     
 
-        selected_ideal_ids = [ObjectId(id) for id in selected_ideal_ids]
-        ideals = list(db['product_ideals'].find({"_id": {"$in": selected_ideal_ids}}))
+        # Validate and convert selected_ideal_ids
+        valid_ideal_ids = []
+        for id in selected_ideal_ids:
+            if id and isinstance(id, str) and len(id) == 24:
+                try:
+                    valid_ideal_ids.append(ObjectId(id))
+                except Exception:
+                    continue
+        if not valid_ideal_ids:
+            return jsonify({
+                'success': False,
+                'message': 'No valid ideal ids provided'
+            }), 400
+        ideals = list(db['product_ideals'].find({"_id": {"$in": valid_ideal_ids}}))
         
         if not ideals:
             return jsonify({

@@ -56,6 +56,17 @@ import Fade from '@mui/material/Fade'
 import Skeleton from '@mui/material/Skeleton'
 import DOMPurify from 'dompurify'
 
+// Add DOMPurify to window for SSR compatibility
+declare global {
+  interface Window {
+    DOMPurify: typeof DOMPurify
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.DOMPurify = DOMPurify
+}
+
 interface Listing {
   _id: string
   shop_id: string
@@ -2834,28 +2845,30 @@ export default function ListingBlock() {
                       }
                     }}
                     dangerouslySetInnerHTML={{
-                      __html: DOMPurify.sanitize(editingContent.description, {
-                        ALLOWED_TAGS: [
-                          'p',
-                          'b',
-                          'i',
-                          'em',
-                          'strong',
-                          'a',
-                          'ul',
-                          'ol',
-                          'li',
-                          'img',
-                          'br',
-                          'h1',
-                          'h2',
-                          'h3',
-                          'h4',
-                          'h5',
-                          'h6'
-                        ],
-                        ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class', 'style']
-                      })
+                      __html: typeof window !== 'undefined' && window.DOMPurify 
+                        ? window.DOMPurify.sanitize(editingContent.description, {
+                            ALLOWED_TAGS: [
+                              'p',
+                              'b',
+                              'i',
+                              'em',
+                              'strong',
+                              'a',
+                              'ul',
+                              'ol',
+                              'li',
+                              'img',
+                              'br',
+                              'h1',
+                              'h2',
+                              'h3',
+                              'h4',
+                              'h5',
+                              'h6'
+                            ],
+                            ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class', 'style']
+                          })
+                        : editingContent.description
                     }}
                   />
                 </Box>
